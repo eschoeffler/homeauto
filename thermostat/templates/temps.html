@@ -1,0 +1,99 @@
+<html>
+<head>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Temperatures</title>
+  <link href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700,400italic|Material+Icons" rel="stylesheet">
+  <link href="/s/css/material.css" rel="stylesheet">
+  <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+  <script type="text/javascript">
+      Date.createFromMysql = function(mysql_string) {
+        var t, result = null;
+
+        if( typeof mysql_string === 'string' ) {
+          t = mysql_string.split(/[- :]/);
+
+          //when t[3], t[4] and t[5] are missing they defaults to zero
+          result = new Date(t[0], t[1] - 1, t[2], t[3] - 8 || 0, t[4] || 0, t[5] || 0);
+        }
+
+        return result;
+      }
+
+      google.charts.load('current', {'packages':['corechart']});
+      google.charts.setOnLoadCallback(drawChart);
+
+      function drawChart() {
+        var data = google.visualization.arrayToDataTable([
+          ['Time', 'Temp', 'Humidity'],
+          {% for temp in temps %}
+          [Date.createFromMysql('{{ temp[0]}}'), {{ temp[1] }}, {{ temp[2] }}],
+          {% endfor %}
+        ]);
+
+        var options = {
+          curveType: 'function',
+          legend: { position: 'bottom' },
+          series: {
+            0: {targetAxisIndex: 0},
+            1: {targetAxisIndex: 1}
+          },
+          vAxes: {
+            // Adds titles to each axis.
+            0: {title: 'Temps (F)'},
+            1: {title: 'Humidity (%)'}
+          },
+        };
+        var chart = new google.visualization.LineChart(document.getElementById('curve_chart'));
+        chart.draw(data, options);
+      }
+    </script>
+    <style>
+      .page {
+        display: flex;
+        flex-direction: column;
+      }
+      .chart {
+        flex: 1 1 0;
+      }
+      .header {
+        flex: none;
+      }
+    </style>
+</head>
+<body>
+  <script type="text/javascript" src="/s/js/menu.js"></script>
+  <div id="menu-widget" class="menu-widget">
+    <div class="menu">
+      <a class="menu-item" href="/temp?time=3days">
+        3 days
+      </a>
+      <a class="menu-item" href="/temp?time=1weeks">
+        1 week
+      </a>
+      <a class="menu-item" href="/temp?time=30days">
+        30 days
+      </a>
+      <a class="menu-item" href="/therm">
+        Thermostat
+      </a>
+      <a class="menu-item" href="/remote">
+        Remote
+      </a>
+    </div>
+    <div class="menu-overlay" onclick="menu.toggle()"></div>
+  </div>
+  <script type="text/javascript">
+    var menu = new Menu();
+    menu.bind(document.getElementById('menu-widget'));
+  </script>
+
+  <div class="page">
+    <div class="header">
+      <button onclick="menu.toggle()" class="menu-button"></button>
+      <h1>Temperature</h1>
+    </div>
+    <div id="curve_chart" class="chart"></div>
+  </div>
+</body>
+</html>
+

@@ -1,0 +1,190 @@
+<html>
+<head>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Remote">
+  <link href="/s/thermostat-manifest.json" rel="manifest">
+  <link rel="apple-touch-icon" sizes="192x192" href="/s/white_thermostat.png">
+
+  <title>Thermostat</title>
+  <link href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700,400italic|Material+Icons" rel="stylesheet">
+  <link href="/s/css/material.css" rel="stylesheet">
+  <script type="text/javascript">
+    var thermVal = {{ therm }};
+    function setThermostat(newVal) {
+      thermVal = Math.min(80, Math.max(50, Math.round(newVal)));
+      var thermEl = document.getElementById('thermostat');
+      thermEl.innerText = '' + thermVal;
+    }
+    ThermostatService = {};
+    ThermostatService.set = function(val) {
+      var xhr = new XMLHttpRequest();
+      xhr.open('POST', '/_/therm?temp=' + val);
+      xhr.addEventListener('load', function() {
+        pollInterval = minPoll;
+        requestPoll();
+      });
+      xhr.send();
+    }
+
+    var minPoll = 1000;
+    var pollInterval = minPoll;
+    var maxPoll = 60000;
+    var nextPoll = null;
+    function poll() {
+      var xhr = new XMLHttpRequest();
+      xhr.open('GET', '/_/therm');
+      xhr.addEventListener('load', function() {
+        var thermEl = document.getElementById('therm');
+        thermEl.classList.remove('on');
+        thermEl.classList.remove('off');
+        var response = JSON.parse(xhr.responseText);
+        thermEl.classList.add(response.status);
+        var top = document.getElementById('top');
+        top.innerText = response.temp;
+        var thermostatEl = document.getElementById('thermostat');
+        thermostatEl.innerText = response.therm;
+        requestPoll();
+      });
+      xhr.send();
+    }
+
+    function requestPoll() {
+      if (nextPoll) {
+        window.clearTimeout(nextPoll);
+      }
+      nextPoll = window.setTimeout(poll, pollInterval);
+      pollInterval = Math.min(maxPoll, pollInterval * 2);
+    }
+    requestPoll();
+    poll();
+
+    function resize() {
+      var h = window.innerHeight - 100;
+      var w =  window.innerWidth - 100;
+      var size = Math.min(h, w);
+      var therm = document.getElementById('therm');
+      therm.style.height = size + 'px';
+      therm.style.width = size + 'px';
+      therm.style.fontSize = (size / 4) + 'px';
+    }
+
+    var dragData = null;
+    function startDrag(e) {
+      dragData = {y: Math.round(e.clientY || e.touches[0].clientY), temp: thermVal};
+      e.preventDefault();
+    }
+    function endDrag(e) {
+      dragData = null;
+      ThermostatService.set(thermVal);
+      e.preventDefault();
+    }
+    function drag(e) {
+      if (!dragData) {
+        return;
+      }
+      var current = Math.round((e.clientY || e.touches[0].clientY));
+      var diff = dragData.y - current;
+      var newVal = dragData.temp + (diff / window.innerHeight) * 30;
+      setThermostat(newVal);
+      e.preventDefault();
+    }
+  </script>
+  <style>
+    #page {
+      height: 100%;
+      width: 100%;
+      cursor: default;
+      user-select: none;
+      padding: 0px;
+      display: flex;
+      align-items: center;
+    }
+    #therm {
+      flex-direction: column;
+      background-color: #1976D2;
+      border-radius: 50%;
+      line-height: 50%;
+      color: white;
+    }
+    #therm.on {
+      background-color: #D32F2F;
+    }
+    .content-centered {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex: 1 1 0;
+    }
+    .flex {
+      flex: 1 0 0;
+    }
+    .sub {
+      color: rgba(255, 255, 255, 0.8);
+      font-size: 50%;
+    }
+    #top {
+      align-items: flex-end;
+    }
+    #bottom {
+      align-items: flex-start;
+    }
+    .dragger {
+      position: absolute;
+      background-color: black;
+      height: 10px;
+      width: 10px;
+      border-radius: 50%;
+    }
+  </style>
+</head>
+<body onresize="resize()">
+  <script type="text/javascript" src="/s/js/menu.js"></script>
+  <div id="menu-widget" class="menu-widget">
+    <div class="menu">
+      <a class="menu-item" href="/temp">
+        Temperature History
+      </a>
+      <a class="menu-item" href="/remote">
+        Remote
+      </a>
+    </div>
+    <div class="menu-overlay" onclick="menu.toggle()"></div>
+  </div>
+  <script type="text/javascript">
+    var menu = new Menu();
+    menu.bind(document.getElementById('menu-widget'));
+  </script>
+
+  <div id="page" class="page">
+    <div class="header">
+      <button onclick="menu.toggle()" class="menu-button"></button>
+      <h1>Thermostat</h1>
+    </div>
+    <div id="therm-container" class="content-centered">
+      <div id="therm" class="content-centered {{ status }}">
+        <div id="top" class="sub flex content-centered"> {{ temp }} </div>
+        <div id="thermostat" class="flex content-centered"> {{ therm }}</div>
+        <div id="bottom" class="sub flex content-centered"></div>
+      </div>
+    </div>
+  </body>
+</body>
+<script type="text/javascript">
+  resize();
+  var thermContainer = document.getElementById('therm-container');
+  thermContainer.addEventListener('mousedown', startDrag);
+  thermContainer.addEventListener('mouseup', endDrag);
+  thermContainer.addEventListener('mousemove', drag);
+  thermContainer.addEventListener('touchstart', startDrag);
+  thermContainer.addEventListener('touchend', endDrag);
+  thermContainer.addEventListener('touchmove', drag);
+
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker
+              .register('/thermostat-service-worker.js', {scope: '/therm'})
+              .then(function() { console.log('Service Worker Registered'); });
+  }
+</script>
+</html>

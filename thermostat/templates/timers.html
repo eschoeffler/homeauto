@@ -1,0 +1,136 @@
+<html>
+<head>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700,400italic|Material+Icons" rel="stylesheet">
+  <link href="/s/css/material.css" rel="stylesheet">
+  <style>
+    .time-temp-selector {
+      display: none;
+      position: absolute;
+      height: 100%;
+      width: 100%;
+      display: flex-box;
+      align-items: center;
+      justify-content: center;
+    }
+    .time-temp-selector.shown {
+      display: flex;
+    }
+    .time-temp-selector-overlay {
+      position: absolute;
+      height: 100%;
+      width: 100%;
+      background-color: black;
+      opacity: .5;
+    }
+    .time-temp-selector-dialog {
+      background-color: white;
+      z-index: 1;
+      padding: 20px;
+    }
+  </style>
+</head>
+<body>
+  <script type="text/javascript" src="/s/js/menu.js"></script>
+  <div id="menu-widget" class="menu-widget">
+    <div class="menu">
+      <a class="menu-item" href="/therm">
+        Thermostat
+      </a>
+      <a class="menu-item" href="/remote">
+        Remote
+      </a>
+    </div>
+    <div class="menu-overlay" onclick="menu.toggle()"></div>
+  </div>
+  <script type="text/javascript">
+    var menu = new Menu();
+    menu.bind(document.getElementById('menu-widget'));
+  </script>
+  <script type="text/javascript">
+    var showTimeTempSelector = function() {
+      var timeTempSelector = document.getElementById("time-temp-selector");
+      timeTempSelector.classList.add("shown");
+    };
+    var hideTimeTempSelector = function() {
+      var timeTempSelector = document.getElementById("time-temp-selector");
+      timeTempSelector.classList.remove("shown");
+    };
+    var addTimeTemp = function() {
+      var temp = document.getElementById('temp').value;
+      var time = document.getElementById('time').value;
+      if (document.getElementById('pm').checked) {
+        var split = time.split(':');
+        time = (parseInt(split[0]) + 12) + ':' + split[1];
+      }
+      var day = "";
+      day += document.getElementById('sunday').checked ? "1" : "0";
+      day += document.getElementById('saturday').checked ? "1" : "0";
+      day += document.getElementById('friday').checked ? "1" : "0";
+      day += document.getElementById('thursday').checked ? "1" : "0";
+      day += document.getElementById('wednesday').checked ? "1" : "0";
+      day += document.getElementById('tuesday').checked ? "1" : "0";
+      day += document.getElementById('monday').checked ? "1" : "0";
+      hideTimeTempSelector();
+      addRule(time, temp, day);
+    }
+    var addRule = function(time, temp, days) {
+      var xhr = new XMLHttpRequest();
+      xhr.open('POST', '/_/therm/timer?time=' + time + '&temp=' + temp + '&days=' + days);
+      xhr.send();
+    };
+    var deleteRule = function(id) {
+      var xhr = new XMLHttpRequest();
+      xhr.open('DELETE', '/_/therm/timer?id=' + id);
+      xhr.send();
+      document.getElementById(id).remove();
+    };
+  </script>
+
+  <div class="page">
+    <div class="header">
+      <button onclick="menu.toggle()" class="menu-button"></button>
+      <h1>Timers</h1>
+    </div>
+
+    <button onclick="showTimeTempSelector('10:20', '72', '1100000');">Add rule</button>
+    <div class="list-box">
+      {% for rule in timer_rules %}
+      <div id="{{ rule.id }}" class="list-item">
+        <div class="list-item-text">
+          <div class="list-item-title">{{ rule.temp }}° @ {{ rule.time }}</div>
+          <div class="list-item-subtitle">{{ rule.days_str }}</div>
+        </div>
+        <button class="icon-button delete" onclick="deleteRule('{{ rule.id }}')"></button>
+      </div>
+      {% endfor %}
+    </div>
+
+    <div id="time-temp-selector" class="time-temp-selector">
+      <div class="time-temp-selector-overlay"></div>
+      <div class="time-temp-selector-dialog">
+        <div class="temp-selector">
+          <label for="temp">Temp: </label><input id="temp" type="text" value="70" placeholder="temp °F (eg 70)">
+        </div>
+        <div class="time-selector">
+          <label for="time">Time: </label><input id="time" type="text" value="10:30" placeholder="time (eg 10:30)">
+          <input id="pm" type="checkbox" checked="true"><label for="pm">PM</label>
+        </div>
+        <div class="day-selector">
+          <input id="sunday" checked="true" type="checkbox"><label for="sunday">Sun</label>
+          <input id="monday" checked="true"  type="checkbox"><label for="monday">Mon</label>
+          <input id="tuesday" checked="true"  type="checkbox"><label for="tuesday">Tue</label>
+          <input id="wednesday" checked="true"  type="checkbox"><label for="wednesday">Wed</label>
+          <input id="thursday" checked="true"  type="checkbox"><label for="thursday">Thu</label>
+          <input id="friday" checked="true"  type="checkbox"><label for="friday">Fri</label>
+          <input id="saturday" checked="true"  type="checkbox"><label for="saturday">Sat</label>
+        </div>
+        <div>
+          <button onclick="hideTimeTempSelector()">Cancel</button>
+          <button onclick="addTimeTemp()">Add</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

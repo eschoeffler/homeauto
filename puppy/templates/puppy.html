@@ -1,0 +1,225 @@
+<html>
+<head>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700,400italic|Material+Icons" rel="stylesheet">
+  <link href="/s/css/material.css" rel="stylesheet">
+  <style>
+    .header h1 {
+      margin-left: 16px;
+    }
+    .list-item {
+      padding: 16px;
+    }
+    .list-item-text {
+      flex-direction: row;
+      align-items: center;
+    }
+    .button-bar {
+      background-color: white;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, .3);
+      display: flex;
+      justify-content: center;
+      flex: none;
+      z-index: 1;
+    }
+    .button-bar-button {
+      width: 50px;
+      height: 50px;
+      margin: 25px;
+      border: none;
+      display: inline-block;
+      background-size: 50px 50px;
+      background-color: transparent;
+    }
+    .poo, .pee {
+      background-image: url('/puppy/s/icons/actions.png');
+      background-size: 100px 50px;
+    }
+    .poo {
+      background-position: 0px;
+    }
+    .pee {
+      background-position: -50px;
+    }
+    .food {
+      background-image: url('/puppy/s/icons/food.png');
+    }
+    .outside {
+      background-image: url('/puppy/s/icons/tree.png');
+    }
+    .inside {
+      background-image: url('/puppy/s/icons/house.png');
+    }
+    .crate {
+      background-image: url('/puppy/s/icons/crate.png');
+    }
+    .interrupted {
+      background-image: url('/puppy/s/icons/interrupted.png');
+    }
+    .list-item-icon {
+      background-image: url('/puppy/s/icons/actions.png');
+      background-size: 48px 24px;
+      width: 24px;
+      height: 24px;
+      margin-right: 24px;
+    }
+    .list-item-icon-poo {
+      background-position: 0px;
+    }
+    .list-item-icon-pee {
+      background-position: -24px;
+    }
+    .list-item-icon-pee {
+      background-position: -24px;
+    }
+    .list-item-icon-food {
+      background-size: 24px 24px;
+      background-image: url('/puppy/s/icons/food.png');
+    }
+  </style>
+</head>
+<body>
+  <script type="text/javascript">
+    var ActionType = {
+      POO: 1,
+      PEE: 2,
+      FOOD: 3
+    };
+
+    var Location = {
+      OUTSIDE: 1,
+      INSIDE: 2,
+      CRATE: 3,
+      INTERRUPTED: 4
+    }
+    var fetchingNextPage = false;
+    var continuationToken = '';
+
+    var addEvent = function(eventToAdd) {
+      var xhr = new XMLHttpRequest();
+      xhr.open('POST',
+          '/_/puppy/add?type=' + eventToAdd.actionType
+          + '&location=' + eventToAdd.location);
+      xhr.addEventListener('load', function() {
+        handleList(JSON.parse(xhr.responseText));
+        toggleButtonBar('action');
+      });
+      xhr.send();
+    };
+    var toggleButtonBar = function(type) {
+      var buttonBars = document.getElementsByClassName('button-bar');
+      Array.from(buttonBars).forEach(element => {
+        if (element.classList.contains(type)) {
+          element.style.display = 'flex';
+        } else {
+          element.style.display = 'none';
+        }
+      });
+    };
+    var eventToAdd = {};
+    var setActionType = function(actionType) {
+      eventToAdd.actionType = actionType;
+      toggleButtonBar('location');
+    };
+    var setLocation = function(location) {
+      eventToAdd.location = location;
+      addEvent(eventToAdd);
+    };
+    var initialize = function() {
+      toggleButtonBar('action');
+
+      var xhr = new XMLHttpRequest();
+      xhr.open('GET', '/_/puppy/list');
+      xhr.addEventListener('load', function() {
+        handleList(JSON.parse(xhr.responseText));
+      });
+      xhr.send();
+
+      var eventList = document.getElementById('event-list')
+      eventList.onscroll = function() {
+        if (!fetchingNextPage &&
+            eventList.scrollTop + eventList.clientHeight > eventList.scrollHeight - 200) {
+          nextPage();
+        }
+      }
+    };
+    var handleEventAdded = function(event) {
+      var eventList = document.getElementById('event-list');
+      var eventEl = document.createElement('div');
+      var textEl = document.createElement('div');
+      var iconEl = document.createElement('div');
+      var subtitleEl = document.createElement('div');
+      var deleteButtonEl = document.createElement('button')
+      eventEl.className = 'list-item';
+      eventEl.id = event.id;
+      textEl.className = 'list-item-text';
+      iconEl.className = 'list-item-icon';
+      if (event.type == 'poo') {
+        iconEl.classList.add('list-item-icon-poo');
+      } else if (event.type == 'pee') {
+        iconEl.classList.add('list-item-icon-pee');
+      } else if (event.type =='food') {
+        iconEl.classList.add('list-item-icon-food');
+      } else {
+        iconEl.className = 'list-item-title';
+        iconEl.innerText = event.type;
+      }
+      subtitleEl.className = 'list-item-subtitle';
+      subtitleEl.innerText = event.time + ' ' + event.location;
+      deleteButtonEl.className = 'icon-button delete';
+      deleteButtonEl.onclick = function() { deleteEvent(event.id) };
+      textEl.appendChild(iconEl);
+      textEl.appendChild(subtitleEl);
+      eventEl.appendChild(textEl);
+      eventEl.appendChild(deleteButtonEl);
+      eventList.appendChild(eventEl);
+    };
+    var handleList = function(response, addToEnd=false) {
+      if (!addToEnd) {
+        document.getElementById('event-list').innerHTML = '';
+      }
+      response.eventList.forEach(event => handleEventAdded(event));
+      continuationToken = response.continuationToken || '';
+    };
+    var deleteEvent = function(id) {
+      var xhr = new XMLHttpRequest();
+      xhr.open('POST', '/_/puppy/delete?id=' + id);
+      xhr.send();
+      document.getElementById(id).remove();
+    };
+    var nextPage = function() {
+      if (!continuationToken) {
+        return;
+      }
+      fetchingNextPage = true;
+      var xhr = new XMLHttpRequest();
+      xhr.open('GET', '/_/puppy/list?continuationToken=' + continuationToken);
+      xhr.addEventListener('load', function() {
+        fetchingNextPage = false;
+        handleList(JSON.parse(xhr.responseText), true);
+      });
+      xhr.send();
+    };
+  </script>
+
+  <div class="page">
+    <div class="header">
+      <h1>Puppy</h1>
+    </div>
+    <div class="button-bar action">
+      <button class="button-bar-button poo" onclick="setActionType(ActionType.POO)"></button>
+      <button class="button-bar-button pee" onclick="setActionType(ActionType.PEE)"></button>
+      <button class="button-bar-button food" onclick="setActionType(ActionType.FOOD)"></button>
+    </div>
+    <div class="button-bar location">
+      <button class="button-bar-button outside" onclick="setLocation(Location.OUTSIDE)"></button>
+      <button class="button-bar-button inside" onclick="setLocation(Location.INSIDE)"></button>
+      <button class="button-bar-button crate" onclick="setLocation(Location.CRATE)"></button>
+      <button class="button-bar-button interrupted" onclick="setLocation(Location.INTERRUPTED)"></button>
+    </div>
+    <div class="list-box" id="event-list">
+    </div>
+  </div>
+  <script type="text/javascript">initialize()</script>
+</body>
+</html>

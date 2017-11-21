@@ -1,0 +1,14 @@
+{
+  "name": "Remote",
+  "short_name": "Remote",
+  "icons": [{
+      "src": "ic_settings_remote_black_48dp.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    }],
+  "start_url": "/remote/app",
+  "display": "standalone",
+  "background_color": "#558B2F",
+  "theme_color": "#558B2F",
+  "scope": "/remote"
+}

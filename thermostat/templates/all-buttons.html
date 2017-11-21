@@ -1,0 +1,51 @@
+<html>
+<head>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700,400italic|Material+Icons" rel="stylesheet">
+  <link href="/s/css/material.css" rel="stylesheet">
+  <script type="text/javascript">
+    var press = function(id) {
+      var xhr = new XMLHttpRequest();
+      xhr.open('POST', '/_/press/' + id);
+      xhr.send();
+    }
+  </script>
+  <style>
+    body {
+      margin: 0;
+      width: 100%;
+    }
+    .list-box {
+      overflow-y: auto;
+    }
+  </style>
+</head>
+<body>
+  <script type="text/javascript" src="/s/js/menu.js"></script>
+  <div id="menu-widget" class="menu-widget">
+    <div class="menu">
+      <a class="menu-item" href="/remote">
+        Remote
+      </a>
+    </div>
+    <div class="menu-overlay" onclick="menu.toggle()"></div>
+  </div>
+  <script type="text/javascript">
+    var menu = new Menu();
+    menu.bind(document.getElementById('menu-widget'));
+  </script>
+
+  <div class="page">
+    <div class="header">
+      <button onclick="menu.toggle()" class="menu-button"></button>
+      <h1>All buttons</h1>
+    </div>
+
+    <div class="list-box">
+      {% for button in buttons %}
+        <button class="list-item" onclick="press('{{ button }}')">{{ button }}</button>
+      {% endfor %}
+    </div>
+  </div>
+</body>
+</html>

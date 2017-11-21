@@ -1,0 +1,176 @@
+<html>
+<head>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Remote</title>
+  <link href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700,400italic|Material+Icons" rel="stylesheet">
+  <link href="/s/css/material.css" rel="stylesheet">
+  <link href="/s/remote-manifest.json" rel="manifest">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Remote">
+  <link rel="apple-touch-icon" sizes="192x192" href="/s/ic_settings_remote_white_48dp.png">
+
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Roboto', sans-serif;
+      text-align: center;
+      user-select: none;
+    }
+    .remote {
+      display: flex;
+      flex-direction: column;
+      width: 100%;
+      height: 100%;
+      padding: 10px;
+      box-sizing: border-box;
+    }
+    .row {
+      display: flex;
+      flex-direction: row;
+    }
+    .column {
+      display: flex;
+      flex-direction: column;
+    }
+    .centered {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .button {
+      flex: auto;
+      border: none;
+      cursor: pointer;
+      background: none;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      margin: 5px;
+    }
+    .spacer {
+      flex: 1 0 0;
+    }
+    .power {
+      flex: auto;
+      background-color: red;
+      color: white;
+      border-radius: 5px;
+    }
+    .arrow {
+      flex: none;
+      font-size: 36px;
+      width: 64px;
+      height: 64px;
+      border: 1px solid black;
+      border-radius: 5px;
+    }
+    .arrow-text {
+      font-size: 24px;
+    }
+    .ok {
+      flex: none;
+      background-color: blue;
+      border-radius: 50%;
+      margin: 10px;
+      width: 55px;
+      height: 55px;
+      color: white;
+    }
+    .text-button {
+      height: auto;
+      width: 60px;
+      padding: 8px;
+      color: white;
+      text-transform: uppercase;
+      background-color: green;
+      border-radius: 5px;
+      height: 48px;
+    }
+    .vertical {
+      flex-direction: column;
+    }
+    .more {
+      position: absolute;
+      top: 5px;
+      left: 5px;
+    }
+  </style>
+</head>
+<body>
+
+  <script type="text/javascript" src="/s/js/menu.js"></script>
+  <div id="menu-widget" class="menu-widget">
+    <div class="menu">
+      <a class="menu-item" href="/remote/all">
+        All Buttons
+      </a>
+      <a class="menu-item" href="/therm">
+        Thermostat
+      </a>
+      <a class="menu-item" href="/temp">
+        Temperature History
+      </a>
+    </div>
+    <div class="menu-overlay" onclick="menu.toggle()"></div>
+  </div>
+  <script type="text/javascript">
+    var menu = new Menu();
+    menu.bind(document.getElementById('menu-widget'));
+  </script>
+
+  <div class="centered page vertical">
+    <div class="header">
+      <button onclick="menu.toggle()" class="menu-button"></button>
+      <h1>Remote</h1>
+    </div>
+    <div class="remote">
+      <div class="centered">
+        <div class="button arrow" onclick="press('KEY_UP')">▲</div>
+      </div>
+      <div class="centered">
+        <div class="button arrow" onclick="press('KEY_LEFT')">◀</div>
+        <div class="button ok" onclick="press('KEY_OK')">OK</div>
+        <div class="button arrow" onclick="press('KEY_RIGHT')">▶</div>
+      </div>
+      <div class="centered">
+        <div class="button arrow" onclick="press('KEY_DOWN')">▼</div>
+      </div>
+      <div class="centered">
+        <div class="button text-button" onclick="press('KEY_EXIT')">Exit</div>
+        <div class="button text-button" onclick="press('KEY_MENU')">Menu</div>
+        <div class="button text-button" onclick="press('input')">input</div>
+      </div>
+      <div class="spacer"></div>
+      <div class="row">
+        <div class="up-down column centered">
+          <div class="button arrow" onclick="press('KEY_CHANNELUP')">▲</div>
+          <div class="arrow-text">ch</div>
+          <div class="button arrow" onclick="press('chdn')">▼</div>
+          <div class="button text-button" onclick="press('KEY_TV')">TV</div>
+        </div>
+        <div class="button power" onclick="press('KEY_POWER')">POW</div>
+        <div class="up-down column centered">
+          <div class="button arrow" onclick="press('KEY_VOLUMEUP')">▲</div>
+          <div class="arrow-text">vol</div>
+          <div class="button arrow" onclick="press('KEY_VOLUMEDOWN')">▼</div>
+          <div class="button text-button" onclick="press('KEY_MUTE')">mute</div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <script type="text/javascript">
+    var press = function(id) {
+      var xhr = new XMLHttpRequest();
+      xhr.open('POST', '/_/press/' + id);
+      xhr.send();
+    }
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker
+                .register('/remote-service-worker.js',  {scope: '/remote'})
+                .then(function() { console.log('Service Worker Registered'); });
+    }
+  </script>
+</body>
+</html>
