@@ -6,7 +6,7 @@ sudo apt-get install git
 sudo apt-get install apache2
 
 ```
-echo \"
+echo \" \
 DOMAIN=\"DOMAIN\" \n\
 DB_USER=\"USERNAME\" \n\
 DB_PASS=\"PASSWORD\" \n\
