@@ -9,7 +9,7 @@ app = Flask(__name__)
 app.config['SERVER_NAME'] = domain
 app.url_map.default_subdomain = "www"
 # Decrease this if we want to update the cache more often.
-app.config['SEND_FILE_MAX_AGE_DEFAULT'] = 3600
+app.config['SEND_FILE_MAX_AGE_DEFAULT'] = 60
 
 mysql = MySQL()
 app.config["MYSQL_DATABASE_USER"] = config.DB_USER
@@ -30,3 +30,10 @@ import puppy.server as puppy_config
 puppy_config.domain = domain
 puppy_config.mysql = mysql
 app.register_blueprint(puppy_app)
+
+from breastfeeding.server import breastfeeding_app
+import breastfeeding.server as breastfeeding_config
+
+breastfeeding_config.domain = domain
+breastfeeding_config.mysql = mysql
+app.register_blueprint(breastfeeding_app)

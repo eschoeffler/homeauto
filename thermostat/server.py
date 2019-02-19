@@ -104,6 +104,27 @@ def post_therm_dialog_api():
   else:
     return json.dumps({"speech": "Hmm, I didn't understand that."})
 
+@thermostat_app.route("/_/room", methods=["POST"])
+def post_room():
+  temp_str = request.args.get("temp")
+  humidity_str = request.args.get("humidity")
+  room = request.args.get("room")
+  now = datetime.datetime.now()
+  expired_date = datetime.datetime.now() - datetime.timedelta(days=30)
+  conn = mysql.connect()
+  try:
+    time = datetime.datetime.now()
+    humidity = float(humidity_str)
+    temp = float(temp_str)
+    cursor = conn.cursor()
+    cursor.execute("INSERT into thermostat.rooms (time, temp, humidity, room) values (%s, %s, %s, %s);", (time, temp, humidity, room))
+    cursor.execute("DELETE from thermostat.rooms where time < %s", expired_date)
+    conn.commit()
+    return json.dumps({"status": "SUCCESS"})
+  finally:
+    conn.close()
+  return json.dumps({"status": "ERROR"})
+
 @thermostat_app.route("/therm/timer")
 def therm_timer():
   conn = mysql.connect()
@@ -174,27 +195,48 @@ def therm_timer_delete_api():
 
 @thermostat_app.route("/temp")
 def temp():
+  ago = ago_from_request(request)
+  conn = mysql.connect()
+  try:
+    cursor = conn.cursor()
+    cursor.execute("SELECT time, temp, humidity, thermtemp FROM thermostat.temp_history where time > %s order by time desc", ago)
+    rows = cursor.fetchall()
+    converted = [(time, temp_util.ctof(temp), humidity, temp_util.ctof(thermtemp)) for (time, temp, humidity, thermtemp) in rows]
+    return render_template("temps.html", temps=filter_temp(converted), hidden_columns=[])
+  finally:
+    conn.close()
+
+@thermostat_app.route("/room")
+def room():
+  ago = ago_from_request(request)
+  room = request.args.get("room") or "nursery"
+  conn = mysql.connect()
+  try:
+    cursor = conn.cursor()
+    cursor.execute("SELECT time, temp, humidity FROM thermostat.rooms where time > %s and room = %s order by time desc", (ago, room))
+    rows = cursor.fetchall()
+    converted = [(time, temp_util.ctof(temp), humidity, 0) for (time, temp, humidity) in rows]
+    return render_template("temps.html", temps=filter_temp(converted), hidden_columns=[3])
+  finally:
+    conn.close()
+
+def filter_temp(temp_history):
+  last_temp = None
+  filtered = []
+  for value in temp_history:
+    if value[1] != last_temp:
+      last_temp = value[1]
+      filtered.append(value);
+  return filtered
+
+def ago_from_request(request):
   time = request.args.get('time') or "1days"
   m = re.compile("(\d+)(\D+)").match(time)
   value = int(m.group(1))
   unit = str(m.group(2))
   now = datetime.datetime.now()
   ago = now - datetime.timedelta(**{unit: value})
-  conn = mysql.connect()
-  try:
-    cursor = conn.cursor()
-    cursor.execute("SELECT time, temp, humidity FROM thermostat.temp_history where time > %s order by time desc", ago)
-    rows = cursor.fetchall()
-    converted = [(time, (temp * 9.0 / 5.0) + 32.0, humidity) for (time, temp, humidity) in rows]
-    last_temp = None
-    filtered = []
-    for value in converted:
-      if value[1] != last_temp:
-        last_temp = value[1]
-        filtered.append(value);
-    return render_template("temps.html", temps=filtered)
-  finally:
-    conn.close()
+  return ago
 
 ### REMOTE ###
 

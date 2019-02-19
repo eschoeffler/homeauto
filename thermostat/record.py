@@ -6,6 +6,7 @@ import datetime
 import logging
 import mysql.connector
 import dbutils
+import time
 
 GPIO.setmode(GPIO.BCM)
 GPIO.setup(26, GPIO.OUT)
@@ -14,7 +15,7 @@ sensor = Adafruit_DHT.DHT22
 pin = 18
 therm_state = False
 
-# logging.basicConfig(level=logging.INFO)
+logging.basicConfig(level=logging.INFO)
 
 def set_therm_state(on):
   global therm_state
@@ -41,8 +42,16 @@ avg = Average(30)
 last_measure = datetime.datetime.now()
 last_record = datetime.datetime.now()
 thermostat = None
+
+logging.info("Starting therm loop")
 while True:
-  cnx = mysql.connector.connect(user="schoeff", password="skeletonkey")
+  try:
+    cnx = mysql.connector.connect(user="schoeff", password="skeletonkey")
+  except:
+    logging.info("SQL connection failed retrying in 2 seconds")
+    time.sleep(2)
+    continue
+
   try:
     now = datetime.datetime.now()
     new_therm = dbutils.read_therm(cnx)
@@ -55,8 +64,9 @@ while True:
       dbutils.write_therm(cnx, rule_temp)
       new_therm = rule_temp
     if measure:
+      logging.debug("Measuring")
       humidity, temperature = Adafruit_DHT.read_retry(sensor, pin)
-      logging.info("Measured %s" % temperature)
+      logging.debug("Measured %s" % temperature)
       if humidity is not None and temperature is not None:
         if humidity > 100 or humidity <  0 or (avg.avg() and abs(temperature - avg.avg()) > 5):
           # A change of 5 degrees is likely a read error, ignore errors.

@@ -1,0 +1,75 @@
+<head>
+  <head>
+  <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Baby Tracker">
+  <link rel="apple-touch-icon" sizes="192x192" href="white-bottle-big.png">
+
+  <title>Breastfeeding</title>
+  <link href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700,400italic|Material+Icons" rel="stylesheet">
+  <link rel="stylesheet" type="text/css" href="main.css">
+  <link rel="stylesheet" type="text/css" href="shared.css">
+  <link href="manifest.json" rel="manifest">
+  <script type="module" src="source-selector.js"></script>
+  <script type="module" src="timer.js"></script>
+  <script type="module" src="number-picker.js"></script>
+  <script type="module" src="list-item.js"></script>
+  <script type="module" src="nav-button.js"></script>
+  <script type="module" src="feed-edit.js"></script>
+  <script type="module" src="feed-part-edit.js"></script>
+  <script type="module" src="sleep-edit.js"></script>
+  <script type="module" src="pump-edit.js"></script>
+  <script type="module" src="record-tab.js"></script>
+  <script type="module" src="feed-tab.js"></script>
+  <script type="module" src="sleep-tab.js"></script>
+  <script type="module" src="pump-tab.js"></script>
+</head>
+<body>
+  <time-picker style="display: none" id="timepicker" has-three></time-picker>
+  <div class="main">
+    <div class="tab-content">
+      <div id="record" class="tab"><record-tab></record-tab></div>
+      <div id="feeds" class="tab"><feed-tab></feed-tab></div>
+      <div id="pumps" class="tab"><pump-tab></pump-tab></div>
+      <div id="sleeps" class="tab"><sleep-tab></sleep-tab></div>
+    </div>
+    <div class="nav">
+      <nav-button id="record-nav" navid="record" image="clock.png">Record</nav-button>
+      <nav-button id="feeds-nav" navid="feeds" image="bottle.png">Feeds</nav-button>
+      <nav-button id="pumps-nav" navid="pumps" image="pump.png">Pumps</nav-button>
+      <nav-button id="sleeps-nav" navid="sleeps" image="bed.png">Sleeps</nav-button>
+    </div>
+  </div>
+  <script type="module">
+    import {model, Tab} from "./model.js";
+
+    model.listen((e) => {
+      if (e.changed.has('tab')) {
+        updateTab();
+      }
+    });
+    for (const navButton of document.getElementsByTagName('nav-button')) {
+      navButton.onclick = (e) => {
+        model.setTab(e.target.navid);
+      }
+    }
+    let selectedTabEl = null;
+    let selectedNavButton = null;
+    const updateTab = () => {
+      if (selectedTabEl) {
+        selectedTabEl.classList.remove('selected');
+        selectedTabEl.childNodes[0].active = false;
+      }
+      if (selectedNavButton) {
+        selectedNavButton.classList.remove('selected');
+      }
+      selectedTabEl = document.getElementById(model.tab);
+      selectedNavButton = document.getElementById(`${model.tab}-nav`);
+      selectedTabEl.classList.add('selected');
+      selectedTabEl.childNodes[0].active = true;
+      selectedNavButton.classList.add('selected');
+    }
+    updateTab();
+  </script>
+</body>
