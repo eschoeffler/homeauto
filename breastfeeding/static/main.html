@@ -39,10 +39,12 @@
       <nav-button id="feeds-nav" navid="feeds" image="bottle.png">Feeds</nav-button>
       <nav-button id="pumps-nav" navid="pumps" image="pump.png">Pumps</nav-button>
       <nav-button id="sleeps-nav" navid="sleeps" image="bed.png">Sleeps</nav-button>
+      <!--<nav-button id="share-nav" navid="share" image="share.png">Share</nav-button>-->
     </div>
   </div>
   <script type="module">
     import {model, Tab} from "./model.js";
+    import {showCreateBaby} from "./create-baby.js";
 
     model.listen((e) => {
       if (e.changed.has('tab')) {
@@ -71,5 +73,8 @@
       selectedNavButton.classList.add('selected');
     }
     updateTab();
+    if (!model.babyId) {
+      showCreateBaby();
+    }
   </script>
 </body>

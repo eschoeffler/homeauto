@@ -1,3 +1,5 @@
+import {getBabyId} from './baby-id.js';
+
 const BASE = '/_/bf/';
 
 export const Endpoint = {
@@ -19,13 +21,20 @@ export const Endpoint = {
   PUMP_LIST: 'pumps',
   PUMP_ADD: 'addpump',
   PUMP_MODIFY: 'changepump',
-  PUMP_REMOVE: 'rmpump'
+  PUMP_REMOVE: 'rmpump',
+
+  BABY_ADD: 'addbaby',
+  BABY_GET: 'getbaby',
 };
 
 export const fetch = (endpoint, data) => {
   return new Promise((resolve, reject) => {
     const xhr = new XMLHttpRequest();
     const params = new URLSearchParams();
+    const babyIdOverride = getBabyId(new URL(window.location.href).searchParams.get('babyId'));
+    if (babyIdOverride) {
+      data['babyId'] = babyIdOverride;
+    }
     for (const key in data) {
       params.append(key, data[key]);
     }

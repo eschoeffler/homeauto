@@ -15,6 +15,12 @@ button {
   border: none;
   outline: none;
   width: 100%;
+  padding: 10px 0;
+}
+#image {
+  width: 36px;
+  height: 36px;
+  margin-bottom: 6px;
 }
 </style>
 <div class="main">

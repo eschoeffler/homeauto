@@ -9,7 +9,7 @@ app = Flask(__name__)
 app.config['SERVER_NAME'] = domain
 app.url_map.default_subdomain = "www"
 # Decrease this if we want to update the cache more often.
-app.config['SEND_FILE_MAX_AGE_DEFAULT'] = 60
+app.config['SEND_FILE_MAX_AGE_DEFAULT'] = 0
 
 mysql = MySQL()
 app.config["MYSQL_DATABASE_USER"] = config.DB_USER

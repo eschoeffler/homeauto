@@ -4,10 +4,32 @@ from flask import request
 
 import time
 import json
+import random
 
 breastfeeding_app = Blueprint('breastfeeding_app', __name__, template_folder="static")
 domain = ''
 mysql = None
+
+def uid():
+  return int(time.time() * 1000) + random.randint(0, 1000)
+
+class ServerError(Exception):
+  pass
+
+def check_baby_id(req):
+  baby_id = req.args.get("babyId")
+  if not baby_id:
+    raise ServerError("Missing babyId parameter")
+  conn = mysql.connect()
+  try:
+    cursor = conn.cursor()
+    cursor.execute("select id from bf.baby where id = %s limit 1", baby_id)
+    if not cursor.fetchone():
+      raise ServerError("No such baby exists")
+  except:
+    conn.close()
+    raise
+  return baby_id
 
 @breastfeeding_app.route("/bf/<path:filename>")
 def serve_breastfeeding_static(filename):
@@ -19,9 +41,12 @@ def add_feed():
   start_time = request.args.get("startTime")
   conn = mysql.connect()
   try:
-    conn.cursor().execute("insert into bf.feeds (id, start_time) values (%s, %s)", (id, start_time))
+    baby_id = check_baby_id(request)
+    conn.cursor().execute("insert into bf.feeds (id, start_time, baby_id) values (%s, %s, %s)", (id, start_time, baby_id))
     conn.commit()
     return json.dumps({"status": "SUCCESS"})
+  except ServerError as e:
+    return json.dumps({"status": "ERROR", "details": e.message})
   finally:
     conn.close()
   return json.dumps({"status": "ERROR"})
@@ -57,10 +82,11 @@ def get_feeds():
   conn = mysql.connect()
   from_time = request.args.get("from")
   try:
+    baby_id = check_baby_id(request)
     cursor = conn.cursor()
-    select_query = "SELECT id, start_time FROM bf.feeds "
+    select_query = "SELECT id, start_time FROM bf.feeds WHERE baby_id = %s " % baby_id
     if from_time:
-      select_query += "WHERE start_time > %s " % from_time
+      select_query += "AND start_time > %s " % from_time
     select_query += "ORDER BY start_time DESC"
     cursor.execute(select_query)
     rows = cursor.fetchall()
@@ -71,6 +97,8 @@ def get_feeds():
         "startTime": start_time
       })
     return json.dumps({"feeds": feeds})
+  except ServerError as e:
+    return json.dumps({"status": "ERROR", "details": e.message})
   finally:
     conn.close()
   return []
@@ -85,9 +113,12 @@ def add_feed_part():
   source = request.args.get("source")
   conn = mysql.connect()
   try:
-    conn.cursor().execute("insert into bf.feed_parts (id, feed_id, start_time, duration, amount, source) values (%s, %s, %s, %s, %s, %s)", (id, feed_id, start_time, duration, amount, source))
+    baby_id = check_baby_id(request)
+    conn.cursor().execute("insert into bf.feed_parts (id, feed_id, baby_id, start_time, duration, amount, source) values (%s, %s, %s, %s, %s, %s, %s)", (id, feed_id, baby_id, start_time, duration, amount, source))
     conn.commit()
     return json.dumps({"status": "SUCCESS"})
+  except ServerError as e:
+    return json.dumps({"status": "ERROR", "details": e.message})
   finally:
     conn.close()
   return json.dumps({"status": "ERROR"})
@@ -125,11 +156,13 @@ def get_feed_parts():
   conn = mysql.connect()
   from_time = request.args.get("from")
   try:
+    baby_id = check_baby_id(request)
     cursor = conn.cursor()
-    select_query = "SELECT bf.feed_parts.id, bf.feed_parts.feed_id, bf.feed_parts.start_time, bf.feed_parts.duration, bf.feed_parts.amount, bf.feed_parts.source FROM bf.feeds INNER JOIN bf.feed_parts on bf.feeds.id = bf.feed_parts.feed_id "
+    select_query = "SELECT bf.feed_parts.id, bf.feed_parts.feed_id, bf.feed_parts.start_time, bf.feed_parts.duration, bf.feed_parts.amount, bf.feed_parts.source FROM bf.feeds INNER JOIN bf.feed_parts on bf.feeds.id = bf.feed_parts.feed_id WHERE bf.feed_parts.baby_id = %s " % baby_id
     if from_time:
-      select_query += "WHERE bf.feeds.start_time > %s " % from_time
+      select_query += "AND bf.feeds.start_time > %s " % from_time
     select_query += "ORDER BY bf.feed_parts.start_time DESC"
+    print select_query
     cursor.execute(select_query)
     rows = cursor.fetchall()
     feedParts = []
@@ -143,6 +176,8 @@ def get_feed_parts():
         "source": source
       })
     return json.dumps({"feedParts": feedParts})
+  except ServerError as e:
+    return json.dumps({"status": "ERROR", "details": e.message})
   finally:
     conn.close()
   return []
@@ -157,9 +192,12 @@ def add_pump():
   amount = request.args.get("amount")
   conn = mysql.connect()
   try:
-    conn.cursor().execute("insert into bf.pumps (id, start_time, duration, rate, suction, amount) values (%s, %s, %s, %s, %s, %s)", (id, start_time, duration, rate, suction, amount))
+    baby_id = check_baby_id(request)
+    conn.cursor().execute("insert into bf.pumps (id, baby_id, start_time, duration, rate, suction, amount) values (%s, %s, %s, %s, %s, %s, %s)", (id, baby_id, start_time, duration, rate, suction, amount))
     conn.commit()
     return json.dumps({"status": "SUCCESS"})
+  except ServerError as e:
+    return json.dumps({"status": "ERROR", "details": e.message})
   finally:
     conn.close()
   return json.dumps({"status": "ERROR"})
@@ -198,10 +236,11 @@ def get_pumps():
   from_time = request.args.get("from")
   conn = mysql.connect()
   try:
+    baby_id = check_baby_id(request)
     cursor = conn.cursor()
-    select_query = "SELECT id, start_time, duration, rate, suction, amount FROM bf.pumps "
+    select_query = "SELECT id, start_time, duration, rate, suction, amount FROM bf.pumps WHERE baby_id = %s " % baby_id
     if from_time:
-      select_query += "WHERE start_time > %s " % from_time
+      select_query += "AND start_time > %s " % from_time
     select_query += "ORDER BY start_time DESC"
     cursor.execute(select_query)
     rows = cursor.fetchall()
@@ -216,6 +255,8 @@ def get_pumps():
         "amount": amount
       })
     return json.dumps({"pumps": pumps})
+  except ServerError as e:
+    return json.dumps({"status": "ERROR", "details": e.message})
   finally:
     conn.close()
   return []
@@ -227,9 +268,12 @@ def add_sleep():
   duration = request.args.get("duration")
   conn = mysql.connect()
   try:
-    conn.cursor().execute("insert into bf.sleeps (id, start_time, duration) values (%s, %s, %s)", (id, start_time, duration))
+    baby_id = check_baby_id(request)
+    conn.cursor().execute("insert into bf.sleeps (id, baby_id, start_time, duration) values (%s, %s, %s, %s)", (id, baby_id, start_time, duration))
     conn.commit()
     return json.dumps({"status": "SUCCESS"})
+  except ServerError as e:
+    return json.dumps({"status": "ERROR", "details": e.message})
   finally:
     conn.close()
   return json.dumps({"status": "ERROR"})
@@ -265,10 +309,11 @@ def get_sleeps():
   from_time = request.args.get("from")
   conn = mysql.connect()
   try:
+    baby_id = check_baby_id(request)
     cursor = conn.cursor()
-    select_query = "SELECT id, start_time, duration FROM bf.sleeps "
+    select_query = "SELECT id, start_time, duration FROM bf.sleeps WHERE baby_id = %s " % baby_id
     if from_time:
-      select_query += "WHERE start_time > %s " % from_time
+      select_query += "AND start_time > %s " % from_time
     select_query += "ORDER BY start_time DESC"
     cursor.execute(select_query)
     rows = cursor.fetchall()
@@ -280,6 +325,44 @@ def get_sleeps():
         "duration": duration
       })
     return json.dumps({"sleeps": sleeps})
+  except ServerError as e:
+    return json.dumps({"status": "ERROR", "details": e.message})
   finally:
     conn.close()
   return []
+
+@breastfeeding_app.route("/_/bf/addbaby")
+def add_baby():
+  name = request.args.get("name")
+  conn = mysql.connect()
+  try:
+    baby_id = uid()
+    cursor = conn.cursor()
+    cursor.execute("INSERT into bf.baby (id, name) values (%s, %s)", (baby_id, name))
+    conn.commit()
+    return json.dumps({"status": "SUCCESS", "babyId": baby_id})
+  finally:
+    conn.close()
+  return json.dumps({"status": "ERROR", "error": "Server error, try again"})
+
+breastfeeding_app.route("/_/bf/getbaby")
+def get_baby():
+  code = request.args.get("code")
+  conn = mysql.connect()
+  try:
+    cursor = conn.cursor()
+    cursor.execute("""
+      SELECT (bf.baby.id, bf.baby.name)
+        FROM bf.baby
+        INNER JOIN bf.baby_share on bf.baby_share.baby_id = bf.baby.id
+        WHERE bf.baby_share.code = %s
+    """)
+    conn.commit()
+    row = cursor.fetchone()
+    if not row:
+      return json.dumps({"status": "SUCCESS", "error": "Invalid code"})
+    else:
+      return json.dumps({"status": "SUCCESS", "babyId": row[0]})
+  finally:
+    conn.close()
+  return json.dumps({"status": "ERROR", "error": "Server error, try again"})

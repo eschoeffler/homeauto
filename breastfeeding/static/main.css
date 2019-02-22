@@ -3,10 +3,10 @@
 }
 
 .tab-content {
-  height: calc(100% - 70px);
+  height: calc(100% - 80px);
 }
 .nav {
-  height: 70px;
+  height: 80px;
   display: flex;
   flex-direction: row;
 }

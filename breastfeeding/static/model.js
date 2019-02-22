@@ -1,5 +1,6 @@
 import {addZeros} from './timeutils.js';
 import {Endpoint, fetch} from './api.js';
+import {getBabyId} from './baby-id.js';
 
 const uid = () => {
   return new Date().getTime() + addZeros(Math.floor(Math.random() * 1000), 3);
@@ -89,7 +90,35 @@ class Model {
     this.invalidate('tab');
   }
 
+  setBaby(babyId) {
+    this.babyId = getBabyId(babyId);
+    localStorage.setItem('babyId', babyId);
+    this.loadData();
+    this.invalidate('babyId');
+  }
+
+  clear() {
+    this.sleeps = [];
+    this.feeds = [];
+    // Map from feed ID to array of feed parts.
+    this.feedParts = new DefaultMap(() => []);
+    this.feedPartsById = new Map();
+    this.pumps = [];
+    this.invalidate('sleeps');
+    this.invalidate('feeds');
+    this.invalidate('feedParts');
+    this.invalidate('pumps');
+  }
+
   load() {
+    const babyId = getBabyId(new URL(window.location.href).searchParams.get('setBabyId'));
+    if (babyId) {
+      this.setBaby(babyId);
+    } else {
+      this.babyId = localStorage.getItem('babyId');
+      this.invalidate('babyId');
+    }
+
     const activeState = localStorage.getItem('activeState');
     if (activeState) {
       this.invalidate('activeState');
@@ -99,22 +128,30 @@ class Model {
     if (tab != null) {
       this.setTab(tab);
     }
+    this.loadData();
+  }
+
+  loadData() {
+    if (!this.babyId) return;
+    this.clear();
     const fromDate = new Date();
     fromDate.setDate(fromDate.getDate() - 7);
     const from = fromDate.getTime();
-    fetch(Endpoint.FEED_LIST, {from}).then((result) => {
+    const babyId = this.babyId;
+    const data = {from, babyId};
+    fetch(Endpoint.FEED_LIST, data).then((result) => {
       this.invalidate('feeds');
       result.feeds.forEach((feed) => this.addFeed_(feed));
     });
-    fetch(Endpoint.FEED_PART_LIST, {from}).then((result) => {
+    fetch(Endpoint.FEED_PART_LIST, data).then((result) => {
       this.invalidate('feedParts');
       result.feedParts.forEach((feedPart) => this.addFeedPart_(feedPart));
     });
-    fetch(Endpoint.SLEEP_LIST, {from}).then((result) => {
+    fetch(Endpoint.SLEEP_LIST, data).then((result) => {
       this.invalidate('sleeps');
       result.sleeps.forEach((sleep) => this.addSleep_(sleep));
     });
-    fetch(Endpoint.PUMP_LIST, {from}).then((result) => {
+    fetch(Endpoint.PUMP_LIST, data).then((result) => {
       this.invalidate('pumps');
       result.pumps.forEach((pump) => this.addPump_(pump));
     });
@@ -214,7 +251,7 @@ class Model {
 
   addSleep(sleep) {
     if (!sleep.id) sleep.id = uid();
-    fetch(Endpoint.SLEEP_ADD, sleep);
+    fetch(Endpoint.SLEEP_ADD, Object.assign({}, sleep, {babyId: this.babyId}));
     this.addSleep_(sleep);
     return sleep.id;
   }
@@ -243,7 +280,7 @@ class Model {
 
   addFeed(feed) {
     if (!feed.id) feed.id = uid();
-    fetch(Endpoint.FEED_ADD, feed);
+    fetch(Endpoint.FEED_ADD, Object.assign({}, feed, {babyId: this.babyId}));
     this.addFeed_(feed);
     return feed.id;
   }
@@ -268,7 +305,7 @@ class Model {
 
   addFeedPart(feedPart) {
     if (!feedPart.id) feedPart.id = uid();
-    fetch(Endpoint.FEED_PART_ADD, feedPart);
+    fetch(Endpoint.FEED_PART_ADD, Object.assign({}, feedPart, {babyId: this.babyId}));
     this.addFeedPart_(feedPart);
     return feedPart.id;
   }
@@ -305,7 +342,7 @@ class Model {
 
   addPump(pump) {
     if (!pump.id) pump.id = uid();
-    fetch(Endpoint.PUMP_ADD, pump);
+    fetch(Endpoint.PUMP_ADD, Object.assign({}, pump, {babyId: this.babyId}));
     this.addPump_(pump);
     return pump.id;
   }
