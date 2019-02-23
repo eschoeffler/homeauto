@@ -16,6 +16,33 @@
 /*!40111 SET @OLD_SQL_NOTES=@@SQL_NOTES, SQL_NOTES=0 */;
 
 --
+-- Table structure for table `baby`
+--
+
+DROP TABLE IF EXISTS `baby`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `baby` (
+  `id` varchar(255) DEFAULT NULL,
+  `name` varchar(255) DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Table structure for table `baby_share`
+--
+
+DROP TABLE IF EXISTS `baby_share`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `baby_share` (
+  `code` varchar(255) DEFAULT NULL,
+  `baby_id` varchar(255) DEFAULT NULL,
+  `expiration_date` datetime DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
 -- Table structure for table `feed_parts`
 --
 
@@ -25,6 +52,7 @@ DROP TABLE IF EXISTS `feed_parts`;
 CREATE TABLE `feed_parts` (
   `id` varchar(255) DEFAULT NULL,
   `feed_id` varchar(255) DEFAULT NULL,
+  `baby_id` varchar(255) DEFAULT NULL,
   `start_time` bigint(20) DEFAULT NULL,
   `duration` int(11) DEFAULT NULL,
   `source` int(11) DEFAULT NULL,
@@ -42,6 +70,7 @@ DROP TABLE IF EXISTS `feeds`;
 /*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `feeds` (
   `id` varchar(255) DEFAULT NULL,
+  `baby_id` varchar(255) DEFAULT NULL,
   `start_time` bigint(20) DEFAULT NULL,
   KEY `time` (`start_time`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
@@ -56,6 +85,7 @@ DROP TABLE IF EXISTS `pumps`;
 /*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `pumps` (
   `id` varchar(255) DEFAULT NULL,
+  `baby_id` varchar(255) DEFAULT NULL,
   `start_time` bigint(20) DEFAULT NULL,
   `duration` int(11) DEFAULT NULL,
   `amount` int(11) DEFAULT NULL,
@@ -74,6 +104,7 @@ DROP TABLE IF EXISTS `sleeps`;
 /*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `sleeps` (
   `id` varchar(255) DEFAULT NULL,
+  `baby_id` varchar(255) DEFAULT NULL,
   `start_time` bigint(20) DEFAULT NULL,
   `duration` int(11) DEFAULT NULL,
   KEY `time` (`start_time`)
@@ -89,4 +120,4 @@ CREATE TABLE `sleeps` (
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2019-02-19  9:39:50
+-- Dump completed on 2019-02-22 21:06:42
