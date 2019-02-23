@@ -1,6 +1,5 @@
 from flask import Flask
 from flaskext.mysql import MySQL
-
 import config
 
 domain = config.DOMAIN
@@ -17,23 +16,22 @@ app.config["MYSQL_DATABASE_PASSWORD"] = config.DB_PASS
 app.config["MYSQL_DATABASE_HOST"] = config.DB_HOST
 mysql.init_app(app)
 
-from thermostat.server import thermostat_app
-import thermostat.server as thermostat_config
+def register_subapp(app, subapp, subapp_config):
+  subapp_config.domain = domain
+  subapp_config.mysql = mysql
+  app.register_blueprint(subapp)
 
-thermostat_config.domain = domain
-thermostat_config.mysql = mysql
-app.register_blueprint(thermostat_app)
+if not "thermostat" in config.disabled:
+  from thermostat.server import thermostat_app
+  import thermostat.server as thermostat_config
+  register_subapp(app, thermostat_app, thermostat_config)
 
-from puppy.server import puppy_app
-import puppy.server as puppy_config
+if not "puppy" in config.disabled:
+  from puppy.server import puppy_app
+  import puppy.server as puppy_config
+  register_subapp(app, puppy_app, puppy_config)
 
-puppy_config.domain = domain
-puppy_config.mysql = mysql
-app.register_blueprint(puppy_app)
-
-from breastfeeding.server import breastfeeding_app
-import breastfeeding.server as breastfeeding_config
-
-breastfeeding_config.domain = domain
-breastfeeding_config.mysql = mysql
-app.register_blueprint(breastfeeding_app)
+if not "breastfeeding" in config.disabled:
+  from breastfeeding.server import breastfeeding_app
+  import breastfeeding.server as breastfeeding_config
+  register_subapp(app, breastfeeding_app, breastfeeding_config)
