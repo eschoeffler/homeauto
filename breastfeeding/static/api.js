@@ -36,7 +36,9 @@ export const fetch = (endpoint, data) => {
       data['babyId'] = babyIdOverride;
     }
     for (const key in data) {
-      params.append(key, data[key]);
+      if (data[key]) {
+        params.append(key, data[key]);
+      }
     }
     const url = BASE + endpoint + '?' + params.toString();
     xhr.open('GET', url);

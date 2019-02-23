@@ -16,6 +16,23 @@ def uid():
 class ServerError(Exception):
   pass
 
+def insert(table, fields, values, include_baby_id=True):
+  conn = mysql.connect()
+  try:
+    if include_baby_id:
+      baby_id = check_baby_id(request)
+      fields = ("baby_id",) + fields
+      values = (baby_id,) + values
+    command = "insert into bf.%s (%s) values (%s)" % (table, ", ".join(fields), ", ".join(["%s"] * len(values)))
+    conn.cursor().execute(command, values)
+    conn.commit()
+    return {"status": "SUCCESS"}
+  except ServerError as e:
+    return {"status": "ERROR", "details": e.message}
+  finally:
+    conn.close()
+  return {"status": "ERROR", "details": "Server error. Try again."}
+
 def check_baby_id(req):
   baby_id = req.args.get("babyId")
   if not baby_id:
@@ -39,17 +56,7 @@ def serve_breastfeeding_static(filename):
 def add_feed():
   id = request.args.get("id")
   start_time = request.args.get("startTime")
-  conn = mysql.connect()
-  try:
-    baby_id = check_baby_id(request)
-    conn.cursor().execute("insert into bf.feeds (id, start_time, baby_id) values (%s, %s, %s)", (id, start_time, baby_id))
-    conn.commit()
-    return json.dumps({"status": "SUCCESS"})
-  except ServerError as e:
-    return json.dumps({"status": "ERROR", "details": e.message})
-  finally:
-    conn.close()
-  return json.dumps({"status": "ERROR"})
+  return json.dumps(insert("feeds", ("id", "start_time"), (id, start_time)))
 
 @breastfeeding_app.route("/_/bf/changefeed")
 def update_feed():
@@ -111,17 +118,9 @@ def add_feed_part():
   duration = request.args.get("duration")
   amount = request.args.get("amount")
   source = request.args.get("source")
-  conn = mysql.connect()
-  try:
-    baby_id = check_baby_id(request)
-    conn.cursor().execute("insert into bf.feed_parts (id, feed_id, baby_id, start_time, duration, amount, source) values (%s, %s, %s, %s, %s, %s, %s)", (id, feed_id, baby_id, start_time, duration, amount, source))
-    conn.commit()
-    return json.dumps({"status": "SUCCESS"})
-  except ServerError as e:
-    return json.dumps({"status": "ERROR", "details": e.message})
-  finally:
-    conn.close()
-  return json.dumps({"status": "ERROR"})
+  return json.dumps(insert("feed_parts",
+      ("id", "feed_id", "start_time", "duration", "amount", "source"),
+      (id, feed_id, start_time, duration, amount, source)))
 
 @breastfeeding_app.route("/_/bf/changefeedpart")
 def update_feed_part():
@@ -190,17 +189,9 @@ def add_pump():
   rate = request.args.get("rate")
   suction = request.args.get("suction")
   amount = request.args.get("amount")
-  conn = mysql.connect()
-  try:
-    baby_id = check_baby_id(request)
-    conn.cursor().execute("insert into bf.pumps (id, baby_id, start_time, duration, rate, suction, amount) values (%s, %s, %s, %s, %s, %s, %s)", (id, baby_id, start_time, duration, rate, suction, amount))
-    conn.commit()
-    return json.dumps({"status": "SUCCESS"})
-  except ServerError as e:
-    return json.dumps({"status": "ERROR", "details": e.message})
-  finally:
-    conn.close()
-  return json.dumps({"status": "ERROR"})
+  return json.dumps(insert("pumps",
+      ("id", "start_time", "duration", "rate", "suction", "amount"),
+      (id, start_time, duration, rate, suction, amount)))
 
 @breastfeeding_app.route("/_/bf/changepump")
 def update_pump():
@@ -266,17 +257,9 @@ def add_sleep():
   id = request.args.get("id")
   start_time = request.args.get("startTime")
   duration = request.args.get("duration")
-  conn = mysql.connect()
-  try:
-    baby_id = check_baby_id(request)
-    conn.cursor().execute("insert into bf.sleeps (id, baby_id, start_time, duration) values (%s, %s, %s, %s)", (id, baby_id, start_time, duration))
-    conn.commit()
-    return json.dumps({"status": "SUCCESS"})
-  except ServerError as e:
-    return json.dumps({"status": "ERROR", "details": e.message})
-  finally:
-    conn.close()
-  return json.dumps({"status": "ERROR"})
+  return json.dumps(insert("sleeps",
+      ("id", "start_time", "duration"),
+      (id, start_time, duration)))
 
 @breastfeeding_app.route("/_/bf/changesleep")
 def update_sleep():
@@ -334,16 +317,11 @@ def get_sleeps():
 @breastfeeding_app.route("/_/bf/addbaby")
 def add_baby():
   name = request.args.get("name")
-  conn = mysql.connect()
-  try:
-    baby_id = uid()
-    cursor = conn.cursor()
-    cursor.execute("INSERT into bf.baby (id, name) values (%s, %s)", (baby_id, name))
-    conn.commit()
-    return json.dumps({"status": "SUCCESS", "babyId": baby_id})
-  finally:
-    conn.close()
-  return json.dumps({"status": "ERROR", "error": "Server error, try again"})
+  baby_id = uid()
+  result = insert("baby", ("id", "name"), (baby_id, name), False)
+  if result["status"] == "SUCCESS":
+    result["babyId"] = baby_id
+  return json.dumps(result)
 
 breastfeeding_app.route("/_/bf/getbaby")
 def get_baby():
