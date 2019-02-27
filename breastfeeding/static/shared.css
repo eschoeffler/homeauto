@@ -6,19 +6,24 @@ body {
   height: 100%;
   width: 100%;
 }
-button {
-  flex: none;
+input {
+  background-color: white;
+}
+button,.button,input {
   margin: 0;
   outline: none;
+  font-size: 24px;
+  line-height: 48px;
+  border-radius: 37px;
+  padding: 6px 24px;
+  font-family: Roboto;
+  box-sizing: border-box;
+}
+button,.button {
+  flex: none;
   background-color: black;
   color: white;
   border: 2px solid white;
-  padding: 6px 24px;
-  border-radius: 37px;
-  box-sizing: border-box;
-  font-family: Roboto;
-  line-height: 60px;
-  font-size: 30px;
 }
 button.center,
 button.left {
@@ -41,10 +46,6 @@ button.selected {
   color: black;
 }
 input {
-  font-size: 30px;
-  border-radius: 37px;
-  background-color: white;
-  padding: 6px 24px;
 }
 .button-group {
   display: flex;

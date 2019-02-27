@@ -28,7 +28,7 @@ const html = `
   </div>
   <div class="edit-feature">
     <div><label for="duration">Start Time</label></div>
-    <button id="start-time"></button>
+    <date-selector id="day"></date-selector><button id="start-time"></button>
   </div>
   <div class="edit-feature">
     <div><label for="duration">Duration</label></div>
@@ -63,11 +63,18 @@ class FeedPartEdit extends HTMLElement {
         this.update();
       }
     });
+    this.dateEl = shadowRoot.querySelector('#day');
     this.startTimeEl = shadowRoot.querySelector('#start-time');
     this.durationEl = shadowRoot.querySelector('#duration');
     this.amountEl = shadowRoot.querySelector('#amount');
     this.doneEl = shadowRoot.querySelector('#done');
+
+    this.dateEl.addEventListener('change', () => this.updateDate());
+    this.startTimeEl.onclick = () => this.editStartTime();
+    this.durationEl.onclick = () => this.editDuration();
+    this.amountEl.onclick = () => this.editAmount();
     this.doneEl.onclick = () => this.saveAndQuit();
+
     this.feedPart = model.getFeedPart(this.getAttribute('mid'));
     this.update();
   }
@@ -102,12 +109,14 @@ class FeedPartEdit extends HTMLElement {
   update() {
     if (!this.feedPart) return;
     this.sourceSelector.setAttribute('selected', this.feedPart.source);
+    this.dateEl.valueAsDate = new Date(this.feedPart.startTime);
     this.startTimeEl.innerText = timeStr(this.feedPart.startTime);
     this.durationEl.innerText = shortDurationStr(this.feedPart.duration || 0);
     this.amountEl.innerText = (this.feedPart.amount || 0) + ' ml';
-    this.startTimeEl.onclick = () => this.editStartTime();
-    this.durationEl.onclick = () => this.editDuration();
-    this.amountEl.onclick = () => this.editAmount();
+  }
+
+  updateDate() {
+    this.feedPart.startTime = this.dateEl.getDateTime(this.feedPart.startTime);
   }
 
   editStartTime() {

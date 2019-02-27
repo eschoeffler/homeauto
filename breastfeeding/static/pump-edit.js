@@ -24,7 +24,7 @@ const html = `
 <div class="main">
   <div class="edit-feature">
     <div><label for="duration">Start Time</label></div>
-    <button id="start-time"></button>
+    <date-selector id="day"></date-selector><button id="start-time"></button>
   </div>
   <div class="edit-feature">
     <div><label for="duration">Duration</label></div>
@@ -62,12 +62,20 @@ class PumpEdit extends HTMLElement {
     super();
     const shadowRoot = this.attachShadow({mode: 'open'});
     shadowRoot.appendChild(PumpEdit.createEl().content.cloneNode(true));
+    this.dateEl = shadowRoot.querySelector('#day');
     this.startTimeEl = shadowRoot.querySelector('#start-time');
     this.durationEl = shadowRoot.querySelector('#duration');
     this.suctionEl = shadowRoot.querySelector('#suction');
     this.rateEl = shadowRoot.querySelector('#rate');
     this.amountEl = shadowRoot.querySelector('#amount');
     this.doneEl = shadowRoot.querySelector('#done');
+
+    this.dateEl.addEventListener('change', () => this.updateDate());
+    this.startTimeEl.onclick = () => this.editStartTime();
+    this.durationEl.onclick = () => this.editDuration();
+    this.amountEl.onclick = () => this.editAmount();
+    this.rateEl.onclick = () => this.editRate();
+    this.suctionEl.onclick = () => this.editSuction();
     this.doneEl.onclick = () => this.saveAndQuit();
     this.pump = model.getPump(this.getAttribute('mid'));
     this.update();
@@ -102,17 +110,17 @@ class PumpEdit extends HTMLElement {
   }
   update() {
     if (!this.pump) return;
+    this.dateEl.valueAsDate = new Date(this.pump.startTime);
     this.startTimeEl.innerText = timeStr(this.pump.startTime);
     this.durationEl.innerText = shortDurationStr(this.pump.duration);
     this.amountEl.innerText = this.pump.amount + ' ml';
     this.rateEl.innerText = this.pump.rate;
     this.suctionEl.innerText = this.pump.suction;
-    this.startTimeEl.onclick = () => this.editStartTime();
-    this.durationEl.onclick = () => this.editDuration();
-    this.amountEl.onclick = () => this.editAmount();
-    this.rateEl.onclick = () => this.editRate();
-    this.suctionEl.onclick = () => this.editSuction();
   }
+  updateDate() {
+    this.pump.startTime = this.dateEl.getDateTime(this.pump.startTime);
+  }
+
   editStartTime() {
     showTimePicker(this.pump.startTime,
         (picker) => {

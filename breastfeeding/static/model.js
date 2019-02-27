@@ -384,6 +384,7 @@ class Model {
     if (index >= 0) {
       array[index] = value;
     }
+    array.sort((a, b) => b.startTime - a.startTime);
   }
 }
 

@@ -25,7 +25,7 @@ const html = `
 <div class="main">
   <div class="edit-feature">
     <div><label for="duration">Start Time</label></div>
-    <button id="start-time"></button>
+    <date-selector id="day"></date-selector><button id="start-time"></button>
   </div>
   <div class="edit-feature">
     <div><label for="duration">Duration</label></div>
@@ -49,10 +49,16 @@ class SleepEdit extends HTMLElement {
     super();
     const shadowRoot = this.attachShadow({mode: 'open'});
     shadowRoot.appendChild(SleepEdit.createEl().content.cloneNode(true));
+    this.dateEl = shadowRoot.querySelector('#day');
     this.startTimeEl = shadowRoot.querySelector('#start-time');
     this.durationEl = shadowRoot.querySelector('#duration');
     this.doneEl = shadowRoot.querySelector('#done');
+
+    this.dateEl.addEventListener('change', () => this.updateDate());
+    this.startTimeEl.onclick = () => this.editStartTime();
+    this.durationEl.onclick = () => this.editDuration();
     this.doneEl.onclick = () => this.saveAndQuit();
+
     this.sleep = model.getSleep(this.getAttribute('mid'));
     this.update();
   }
@@ -86,10 +92,13 @@ class SleepEdit extends HTMLElement {
   }
   update() {
     if (!this.sleep) return;
+    this.dateEl.valueAsDate = new Date(this.sleep.startTime);
     this.startTimeEl.innerText = timeStr(this.sleep.startTime);
     this.durationEl.innerText = longDurationStr(this.sleep.duration || 0);
-    this.startTimeEl.onclick = () => this.editStartTime();
-    this.durationEl.onclick = () => this.editDuration();
+  }
+
+  updateDate() {
+    this.sleep.startTime = this.dateEl.getDateTime(this.sleep.startTime);
   }
 
   editStartTime() {

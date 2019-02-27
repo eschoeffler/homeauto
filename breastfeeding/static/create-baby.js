@@ -9,12 +9,13 @@ const html = `
   position: absolute;
   top: 0;
   background: #444;
-  height: 100%;
   width: 100%;
   text-align: center;
   display: flex;
   flex-direction: column;
   align-items: center;
+  padding: 0 20px 100px;
+  box-sizing: border-box;
 }
 .separator {
   color: #ccc;
@@ -22,8 +23,10 @@ const html = `
 }
 input {
   margin-bottom: 16px;
-  width: 306px;
-  outline: none;
+  width: 100%;
+}
+button {
+  width: 100%;
 }
 </style>
 <div class="main">

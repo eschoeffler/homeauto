@@ -31,6 +31,10 @@ def check_baby_id(req):
     raise
   return baby_id
 
+@breastfeeding_app.route("/bf2/<path:filename>")
+def serve_breastfeeding_static(filename):
+  return send_from_directory("breastfeeding/v2", filename)
+
 @breastfeeding_app.route("/bf/<path:filename>")
 def serve_breastfeeding_static(filename):
   return send_from_directory("breastfeeding/static", filename)
