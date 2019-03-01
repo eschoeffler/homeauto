@@ -1,5 +1,5 @@
 import json
-import dbutils
+from . import dbutils
 
 def setf(sql, tempf):
   set(sql, ftoc(tempf))

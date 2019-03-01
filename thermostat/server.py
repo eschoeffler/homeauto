@@ -5,8 +5,9 @@ from flask import send_from_directory
 from flask import send_file
 from flask import Blueprint
 
-import remote_util
-import temp_util
+from . import remote_util
+from . import temp_util
+
 import datetime
 import json
 import re
@@ -70,7 +71,7 @@ def therm_():
   return render_template("therm.html",
       therm=int(round(temp_util.ctof(therm))),
       temp=temp_util.ctof(temp),
-      status=get_status())
+     status=get_status())
 
 @thermostat_app.route("/_/therm", methods=["GET"])
 def get_therm_api():

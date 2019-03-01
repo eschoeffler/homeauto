@@ -105,7 +105,6 @@ def get_recent(continuationToken=None, page_size=20):
     else:
       params = page_size
     select_query += "ORDER BY time DESC LIMIT %s;"
-    print(select_query)
     cursor.execute(select_query, page_size)
     now = datetime.datetime.now()
     rows = cursor.fetchall()

@@ -5,7 +5,7 @@ import RPi.GPIO as GPIO
 import datetime
 import logging
 import mysql.connector
-import dbutils
+from . import dbutils
 import time
 
 GPIO.setmode(GPIO.BCM)

@@ -1,21 +1,22 @@
 from flask import Flask
-from flaskext.mysql import MySQL
+from mysql import connector
 from flask import send_from_directory
 import config
 
 domain = config.DOMAIN
 
 app = Flask(__name__)
-app.config['SERVER_NAME'] = domain
-app.url_map.default_subdomain = "www"
+if domain:
+  app.config['SERVER_NAME'] = domain
+  app.url_map.default_subdomain = "www"
 # Decrease this if we want to update the cache more often.
 app.config['SEND_FILE_MAX_AGE_DEFAULT'] = 0
 
+class MySQL():
+  def connect(self):
+    return connector.connect(host=config.DB_HOST, user=config.DB_USER, password=config.DB_PASS)
+
 mysql = MySQL()
-app.config["MYSQL_DATABASE_USER"] = config.DB_USER
-app.config["MYSQL_DATABASE_PASSWORD"] = config.DB_PASS
-app.config["MYSQL_DATABASE_HOST"] = config.DB_HOST
-mysql.init_app(app)
 
 def register_subapp(app, subapp, subapp_config):
   subapp_config.domain = domain
@@ -42,5 +43,4 @@ if not "breastfeeding" in config.disabled:
   register_subapp(app, breastfeeding_app, breastfeeding_config)
 
 if __name__ == '__main__':
-   app.run()
-
+   app.run(host="0.0.0.0")
