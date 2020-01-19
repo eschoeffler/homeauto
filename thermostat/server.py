@@ -135,7 +135,7 @@ def therm_timer():
     rows = cursor.fetchall()
     timer_rules = []
     for (id, time, temp, days) in rows:
-      day_bit_mask = ord(days)
+      day_bit_mask = days
       selected_days = []
       for day in DayOrder:
         if day["bit"] & day_bit_mask:
@@ -172,6 +172,8 @@ def therm_timer_api():
   conn = mysql.connect()
   try:
     cursor = conn.cursor()
+    print("days_str")
+    print(int(days_str, 2))
     cursor.execute(
         "INSERT into thermostat.temp_rules (time, temp, days) values (%s, %s, %s);",
         (time_str, temp_util.ftoc(int(temp_str)), int(days_str, 2)))
@@ -188,7 +190,7 @@ def therm_timer_delete_api():
   conn = mysql.connect()
   try:
     cursor = conn.cursor()
-    cursor.execute("DELETE from thermostat.temp_rules where id=%s;", rule_id)
+    cursor.execute("DELETE from thermostat.temp_rules where id=%s;" % rule_id)
     conn.commit()
     return json.dumps({"status": "SUCCESS"})
   finally:

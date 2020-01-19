@@ -41,7 +41,7 @@ DROP TABLE IF EXISTS `temp_rules`;
 CREATE TABLE `temp_rules` (
   `time` time DEFAULT NULL,
   `temp` float DEFAULT NULL,
-  `days` bit(7) DEFAULT NULL,
+  `days` tinyint DEFAULT NULL,
   `id` mediumint(8) unsigned NOT NULL AUTO_INCREMENT,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=15 DEFAULT CHARSET=latin1;

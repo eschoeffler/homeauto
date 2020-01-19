@@ -5,7 +5,7 @@ import RPi.GPIO as GPIO
 import datetime
 import logging
 import mysql.connector
-from . import dbutils
+import dbutils
 import time
 
 GPIO.setmode(GPIO.BCM)
@@ -15,7 +15,7 @@ sensor = Adafruit_DHT.DHT22
 pin = 18
 therm_state = False
 
-logging.basicConfig(level=logging.INFO)
+logging.basicConfig(level=logging.DEBUG)
 
 def set_therm_state(on):
   global therm_state
@@ -39,14 +39,14 @@ class Average():
 
 THRES = 0.25
 avg = Average(30)
-last_measure = datetime.datetime.now()
-last_record = datetime.datetime.now()
+last_measure = datetime.datetime(1970, 1, 1, 0, 0)
+last_record = datetime.datetime(1970, 1, 1, 0, 0)
 thermostat = None
 
 logging.info("Starting therm loop")
 while True:
   try:
-    cnx = mysql.connector.connect(user="schoeff", password="skeletonkey")
+    cnx = mysql.connector.connect(user="root", password="skeletonkey")
   except:
     logging.info("SQL connection failed retrying in 2 seconds")
     time.sleep(2)
@@ -55,7 +55,9 @@ while True:
   try:
     now = datetime.datetime.now()
     new_therm = dbutils.read_therm(cnx)
-
+    if new_therm == None:
+      new_therm = 18
+      dbutils.write_therm(cnx, new_therm)
     measure = new_therm != thermostat or (now - last_measure).total_seconds() >= 10
     thermostat = new_therm
     # Won't work for 11:59:59 midnight sometimes.
