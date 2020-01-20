@@ -119,7 +119,7 @@ def post_room():
     temp = float(temp_str)
     cursor = conn.cursor()
     cursor.execute("INSERT into thermostat.rooms (time, temp, humidity, room) values (%s, %s, %s, %s);", (time, temp, humidity, room))
-    cursor.execute("DELETE from thermostat.rooms where time < %s", expired_date)
+    cursor.execute("DELETE from thermostat.rooms where time < %s", (expired_date,))
     conn.commit()
     return json.dumps({"status": "SUCCESS"})
   finally:
@@ -207,7 +207,7 @@ def therm_timer_delete_api():
   conn = mysql.connect()
   try:
     cursor = conn.cursor()
-    cursor.execute("DELETE from thermostat.temp_rules where id=%s;" % rule_id)
+    cursor.execute("DELETE from thermostat.temp_rules where id=%s;", (rule_id,))
     conn.commit()
     return json.dumps({"status": "SUCCESS"})
   finally:
@@ -218,8 +218,9 @@ def temp():
   ago = ago_from_request(request)
   conn = mysql.connect()
   try:
+    print(ago)
     cursor = conn.cursor()
-    cursor.execute("SELECT time, temp, humidity, thermtemp FROM thermostat.temp_history where time > %s order by time desc", ago)
+    cursor.execute("SELECT time, temp, humidity, thermtemp FROM thermostat.temp_history where time > %s order by time desc", (ago,))
     rows = cursor.fetchall()
     converted = [(time, temp_util.ctof(temp), humidity, temp_util.ctof(thermtemp)) for (time, temp, humidity, thermtemp) in rows]
     return render_template("temps.html", temps=filter_temp(converted), hidden_columns=[])
