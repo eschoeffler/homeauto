@@ -45,16 +45,16 @@
     menu.bind(document.getElementById('menu-widget'));
   </script>
   <script type="text/javascript">
-    const timeTempSelectorId = null;
+    let timeTempSelectorId = null;
     var showTimeTempSelector = function(time = null, temp = null, days = "1111111", isPm = false, id=null) {
       if (time) {
-        document.getElementById("temp").value = time;
+        document.getElementById("time").value = time;
       }
       if (temp) {
-        document.getElementById("time").value = temp;
+        document.getElementById("temp").value = temp;
       }
       document.getElementById("pm").checked = isPm;
-      const dayInputs = document.getElementsByClassname("day-input");
+      const dayInputs = document.getElementsByClassName("day-input");
       let i = 0;
       for (const dayInput of dayInputs) {
         dayInput.checked = days.charAt(i) == "1";
@@ -89,8 +89,11 @@
     }
     var addRule = function(time, temp, days, id = null) {
       var xhr = new XMLHttpRequest();
-      const idParam = id ? `id=${id}` : '';
+      const idParam = id ? `&id=${id}` : '';
       xhr.open('POST', '/_/therm/timer?time=' + time + '&temp=' + temp + '&days=' + days + idParam);
+      xhr.onload = () => {
+        location.reload()
+      };
       xhr.send();
     };
     var deleteRule = function(id) {
@@ -110,7 +113,7 @@
     <div class="list-box">
       {% for rule in timer_rules %}
       <div id="{{ rule.id }}" class="list-item" onclick="showTimeTempSelector(
-          {{ rule.raw_time }}, {{ rule_.temp }}, {{ rule.bit_string }}, {{ rule.is_pm }}, {{ rule.id }})">
+          '{{ rule.rawtime }}', '{{ rule.temp }}', '{{ rule.days }}', {{ rule.is_pm }}, '{{ rule.id }}')">
         <div class="list-item-text">
           <div class="list-item-title">{{ rule.temp }}° @ {{ rule.time }}</div>
           <div class="list-item-subtitle">{{ rule.days_str }}</div>

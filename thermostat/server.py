@@ -119,7 +119,7 @@ def post_room():
     temp = float(temp_str)
     cursor = conn.cursor()
     cursor.execute("INSERT into thermostat.rooms (time, temp, humidity, room) values (%s, %s, %s, %s);", (time, temp, humidity, room))
-    cursor.execute("DELETE from thermostat.rooms where time < %s", expired_date)
+    cursor.execute("DELETE from thermostat.rooms where time < %s", (expired_date,))
     conn.commit()
     return json.dumps({"status": "SUCCESS"})
   finally:
@@ -137,6 +137,7 @@ def therm_timer():
     for (id, time, temp, days) in rows:
       day_bit_mask = days
       selected_days = []
+      bit_string = ""
       for day in DayOrder:
         if day["bit"] & day_bit_mask:
           selected_days.append(day["string"])
@@ -161,7 +162,7 @@ def therm_timer():
       timer_rules.append({
         "id": id,
         "time": unformatted_time.strftime("%l:%M %p"),
-        "rawtime": unformatted_time.strftime("%l:%M"),
+        "rawtime": unformatted_time.strftime("%l:%M").strip(),
         "is_pm": "true" if unformatted_time.strftime("%p").lower() == "pm" else "false",
         "temp": int(round(temp_util.ctof(temp))),
         "days_str": days_str,
@@ -183,12 +184,12 @@ def therm_timer_api():
     days = int(days_str, 2)
     cursor = conn.cursor()
     if id_str:
-      cursor.execut(
+      cursor.execute(
         ("UPDATE thermostat.temp_rules SET "
          "  time = %s,"
          "  temp = %s,"
-         "  days = %s,"
-         "WHERE id = ") + id_str , (time_str, temp, days))
+         "  days = %s "
+         "WHERE id = %s"), (time_str, temp, days, id_str))
     else:
       cursor.execute(
           "INSERT into thermostat.temp_rules (time, temp, days) values (%s, %s, %s);",
@@ -206,7 +207,7 @@ def therm_timer_delete_api():
   conn = mysql.connect()
   try:
     cursor = conn.cursor()
-    cursor.execute("DELETE from thermostat.temp_rules where id=%s;" % rule_id)
+    cursor.execute("DELETE from thermostat.temp_rules where id=%s;", (rule_id,))
     conn.commit()
     return json.dumps({"status": "SUCCESS"})
   finally:
@@ -217,8 +218,9 @@ def temp():
   ago = ago_from_request(request)
   conn = mysql.connect()
   try:
+    print(ago)
     cursor = conn.cursor()
-    cursor.execute("SELECT time, temp, humidity, thermtemp FROM thermostat.temp_history where time > %s order by time desc", ago)
+    cursor.execute("SELECT time, temp, humidity, thermtemp FROM thermostat.temp_history where time > %s order by time desc", (ago,))
     rows = cursor.fetchall()
     converted = [(time, temp_util.ctof(temp), humidity, temp_util.ctof(thermtemp)) for (time, temp, humidity, thermtemp) in rows]
     return render_template("temps.html", temps=filter_temp(converted), hidden_columns=[])
