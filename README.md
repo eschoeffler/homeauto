@@ -6,9 +6,9 @@ functionality in it that I've toyed with.
 ## Installation Instructions
 
 ### Basic linux setup
-sudo adduser eschoeffler
-sudo adduser eschoeffler sudo
-sudo adduser eschoeffler gpio
+`sudo adduser eschoeffler`
+`sudo adduser eschoeffler sudo`
+`sudo adduser eschoeffler gpio`
 
 ### Install dependencies
 sudo apt update
