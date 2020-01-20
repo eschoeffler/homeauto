@@ -37,9 +37,6 @@
       <a class="menu-item" href="/therm">
         Thermostat
       </a>
-      <a class="menu-item" href="/remote">
-        Remote
-      </a>
     </div>
     <div class="menu-overlay" onclick="menu.toggle()"></div>
   </div>
@@ -48,9 +45,25 @@
     menu.bind(document.getElementById('menu-widget'));
   </script>
   <script type="text/javascript">
-    var showTimeTempSelector = function() {
+    const timeTempSelectorId = null;
+    var showTimeTempSelector = function(time = null, temp = null, days = "1111111", isPm = false, id=null) {
+      if (time) {
+        document.getElementById("temp").value = time;
+      }
+      if (temp) {
+        document.getElementById("time").value = temp;
+      }
+      document.getElementById("pm").checked = isPm;
+      const dayInputs = document.getElementsByClassname("day-input");
+      let i = 0;
+      for (const dayInput of dayInputs) {
+        dayInput.checked = days.charAt(i) == "1";
+        i++;
+      }
+
       var timeTempSelector = document.getElementById("time-temp-selector");
       timeTempSelector.classList.add("shown");
+      timeTempSelectorId = id;
     };
     var hideTimeTempSelector = function() {
       var timeTempSelector = document.getElementById("time-temp-selector");
@@ -72,11 +85,12 @@
       day += document.getElementById('tuesday').checked ? "1" : "0";
       day += document.getElementById('monday').checked ? "1" : "0";
       hideTimeTempSelector();
-      addRule(time, temp, day);
+      addRule(time, temp, day, timeTempSelectorId);
     }
-    var addRule = function(time, temp, days) {
+    var addRule = function(time, temp, days, id = null) {
       var xhr = new XMLHttpRequest();
-      xhr.open('POST', '/_/therm/timer?time=' + time + '&temp=' + temp + '&days=' + days);
+      const idParam = id ? `id=${id}` : '';
+      xhr.open('POST', '/_/therm/timer?time=' + time + '&temp=' + temp + '&days=' + days + idParam);
       xhr.send();
     };
     var deleteRule = function(id) {
@@ -93,10 +107,10 @@
       <h1>Timers</h1>
     </div>
 
-    <button onclick="showTimeTempSelector('10:20', '72', '1100000');">Add rule</button>
     <div class="list-box">
       {% for rule in timer_rules %}
-      <div id="{{ rule.id }}" class="list-item">
+      <div id="{{ rule.id }}" class="list-item" onclick="showTimeTempSelector(
+          {{ rule.raw_time }}, {{ rule_.temp }}, {{ rule.bit_string }}, {{ rule.is_pm }}, {{ rule.id }})">
         <div class="list-item-text">
           <div class="list-item-title">{{ rule.temp }}° @ {{ rule.time }}</div>
           <div class="list-item-subtitle">{{ rule.days_str }}</div>
@@ -105,25 +119,26 @@
       </div>
       {% endfor %}
     </div>
+    <button class="button" onclick="showTimeTempSelector('7:00', '70', '1111111', false);">+ Add rule</button>
 
     <div id="time-temp-selector" class="time-temp-selector">
       <div class="time-temp-selector-overlay"></div>
       <div class="time-temp-selector-dialog">
         <div class="temp-selector">
-          <label for="temp">Temp: </label><input id="temp" type="text" value="70" placeholder="temp °F (eg 70)">
+          <label for="temp">Temp: </label><input id="temp" type="text" placeholder="temp °F (eg 70)">
         </div>
         <div class="time-selector">
-          <label for="time">Time: </label><input id="time" type="text" value="10:30" placeholder="time (eg 10:30)">
-          <input id="pm" type="checkbox" checked="true"><label for="pm">PM</label>
+          <label for="time">Time: </label><input id="time" type="text" placeholder="time (eg 10:30)">
+          <input id="pm" type="checkbox"><label for="pm">PM</label>
         </div>
         <div class="day-selector">
-          <input id="sunday" checked="true" type="checkbox"><label for="sunday">Sun</label>
-          <input id="monday" checked="true"  type="checkbox"><label for="monday">Mon</label>
-          <input id="tuesday" checked="true"  type="checkbox"><label for="tuesday">Tue</label>
-          <input id="wednesday" checked="true"  type="checkbox"><label for="wednesday">Wed</label>
-          <input id="thursday" checked="true"  type="checkbox"><label for="thursday">Thu</label>
-          <input id="friday" checked="true"  type="checkbox"><label for="friday">Fri</label>
-          <input id="saturday" checked="true"  type="checkbox"><label for="saturday">Sat</label>
+          <input class="day-input" id="sunday" type="checkbox"><label for="sunday">Sun</label>
+          <input class="day-input" id="monday" type="checkbox"><label for="monday">Mon</label>
+          <input class="day-input" id="tuesday" type="checkbox"><label for="tuesday">Tue</label>
+          <input class="day-input" id="wednesday" type="checkbox"><label for="wednesday">Wed</label>
+          <input class="day-input" id="thursday" type="checkbox"><label for="thursday">Thu</label>
+          <input class="day-input" id="friday" type="checkbox"><label for="friday">Fri</label>
+          <input class="day-input" id="saturday" type="checkbox"><label for="saturday">Sat</label>
         </div>
         <div>
           <button onclick="hideTimeTempSelector()">Cancel</button>

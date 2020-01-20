@@ -140,6 +140,9 @@ def therm_timer():
       for day in DayOrder:
         if day["bit"] & day_bit_mask:
           selected_days.append(day["string"])
+          bit_string += "1"
+        else:
+          bit_string += "0"
       days_str = ""
       if len(selected_days) == 7:
         days_str = "Everyday"
@@ -154,11 +157,15 @@ def therm_timer():
       else:
         days_str = ", ".join(selected_days)
 
+      unformatted_time = (datetime.datetime.min + time).time()
       timer_rules.append({
         "id": id,
-        "time": (datetime.datetime.min + time).time().strftime("%l:%M %p"),
+        "time": unformatted_time.strftime("%l:%M %p"),
+        "rawtime": unformatted_time.strftime("%l:%M"),
+        "is_pm": "true" if unformatted_time.strftime("%p").lower() == "pm" else "false",
         "temp": int(round(temp_util.ctof(temp))),
-        "days_str": days_str
+        "days_str": days_str,
+        "days": bit_string
       })
     return render_template("timers.html", timer_rules=timer_rules)
   finally:
@@ -169,14 +176,23 @@ def therm_timer_api():
   temp_str = request.args.get("temp")
   time_str = request.args.get("time")
   days_str = request.args.get("days")
+  id_str = request.args.get("id")
   conn = mysql.connect()
   try:
+    temp = temp_util.ftoc(int(temp_str))
+    days = int(days_str, 2)
     cursor = conn.cursor()
-    print("days_str")
-    print(int(days_str, 2))
-    cursor.execute(
-        "INSERT into thermostat.temp_rules (time, temp, days) values (%s, %s, %s);",
-        (time_str, temp_util.ftoc(int(temp_str)), int(days_str, 2)))
+    if id_str:
+      cursor.execut(
+        ("UPDATE thermostat.temp_rules SET "
+         "  time = %s,"
+         "  temp = %s,"
+         "  days = %s,"
+         "WHERE id = ") + id_str , (time_str, temp, days))
+    else:
+      cursor.execute(
+          "INSERT into thermostat.temp_rules (time, temp, days) values (%s, %s, %s);",
+          (time_str, temp, days))
     conn.commit()
     id = cursor.lastrowid
     return json.dumps({"status": "SUCCESS", "id": id})
