@@ -61,8 +61,10 @@ while True:
     measure = new_therm != thermostat or (now - last_measure).total_seconds() >= 10
     thermostat = new_therm
     # Won't work for 11:59:59 midnight sometimes.
+    logging.debug("Checking for rule %s %s" % (last_measure, now))
     rule_temp = dbutils.get_rule(cnx, last_measure, now)
     if rule_temp:
+      logging.debug("Found rule %s" % rule_temp)
       dbutils.write_therm(cnx, rule_temp)
       new_therm = rule_temp
     if measure:
