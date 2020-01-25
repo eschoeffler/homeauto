@@ -1,0 +1,88 @@
+[Mon Jan 20 06:25:06.840493 2020] [wsgi:warn] [pid 824:tid 1995517952] mod_wsgi: Compiled for Python/3.4.2rc1+.
+[Mon Jan 20 06:25:06.840652 2020] [wsgi:warn] [pid 824:tid 1995517952] mod_wsgi: Runtime using Python/3.4.2.
+[Mon Jan 20 06:25:06.842005 2020] [mpm_event:notice] [pid 824:tid 1995517952] AH00489: Apache/2.4.10 (Raspbian) mod_wsgi/4.3.0 Python/3.4.2 configured -- resuming normal operations
+[Mon Jan 20 06:25:06.842097 2020] [core:notice] [pid 824:tid 1995517952] AH00094: Command line: '/usr/sbin/apache2'
+[Mon Jan 20 15:55:49.674138 2020] [mpm_event:notice] [pid 824:tid 1995517952] AH00494: SIGHUP received.  Attempting to restart
+AH00558: apache2: Could not reliably determine the server's fully qualified domain name, using 127.0.1.1. Set the 'ServerName' directive globally to suppress this message
+[Mon Jan 20 15:55:49.881542 2020] [wsgi:warn] [pid 824:tid 1995517952] mod_wsgi: Compiled for Python/3.4.2rc1+.
+[Mon Jan 20 15:55:49.881605 2020] [wsgi:warn] [pid 824:tid 1995517952] mod_wsgi: Runtime using Python/3.4.2.
+[Mon Jan 20 15:55:49.898035 2020] [mpm_event:notice] [pid 824:tid 1995517952] AH00489: Apache/2.4.10 (Raspbian) mod_wsgi/4.3.0 Python/3.4.2 configured -- resuming normal operations
+[Mon Jan 20 15:55:49.898171 2020] [core:notice] [pid 824:tid 1995517952] AH00094: Command line: '/usr/sbin/apache2'
+[Mon Jan 20 08:20:45.719840 2020] [wsgi:error] [pid 29122:tid 1963328560] 2020-01-19 08:20:45.471749
+[Mon Jan 20 08:21:18.706277 2020] [wsgi:error] [pid 29122:tid 1929774128] 2020-01-19 08:21:18.503723
+[Mon Jan 20 08:57:33.229722 2020] [wsgi:error] [pid 29122:tid 1963328560] [remote 192.168.86.1:36470] [2020-01-20 08:57:33,222] ERROR in app: Exception on /_/therm [GET]
+[Mon Jan 20 08:57:33.229848 2020] [wsgi:error] [pid 29122:tid 1963328560] [remote 192.168.86.1:36470] Traceback (most recent call last):
+[Mon Jan 20 08:57:33.229870 2020] [wsgi:error] [pid 29122:tid 1963328560] [remote 192.168.86.1:36470]   File "/var/www/main/venv/lib/python3.4/site-packages/flask/app.py", line 2446, in wsgi_app
+[Mon Jan 20 08:57:33.229891 2020] [wsgi:error] [pid 29122:tid 1963328560] [remote 192.168.86.1:36470]     response = self.full_dispatch_request()
+[Mon Jan 20 08:57:33.229910 2020] [wsgi:error] [pid 29122:tid 1963328560] [remote 192.168.86.1:36470]   File "/var/www/main/venv/lib/python3.4/site-packages/flask/app.py", line 1951, in full_dispatch_request
+[Mon Jan 20 08:57:33.229929 2020] [wsgi:error] [pid 29122:tid 1963328560] [remote 192.168.86.1:36470]     rv = self.handle_user_exception(e)
+[Mon Jan 20 08:57:33.229951 2020] [wsgi:error] [pid 29122:tid 1963328560] [remote 192.168.86.1:36470]   File "/var/www/main/venv/lib/python3.4/site-packages/flask/app.py", line 1820, in handle_user_exception
+[Mon Jan 20 08:57:33.229971 2020] [wsgi:error] [pid 29122:tid 1963328560] [remote 192.168.86.1:36470]     reraise(exc_type, exc_value, tb)
+[Mon Jan 20 08:57:33.229989 2020] [wsgi:error] [pid 29122:tid 1963328560] [remote 192.168.86.1:36470]   File "/var/www/main/venv/lib/python3.4/site-packages/flask/_compat.py", line 39, in reraise
+[Mon Jan 20 08:57:33.230008 2020] [wsgi:error] [pid 29122:tid 1963328560] [remote 192.168.86.1:36470]     raise value
+[Mon Jan 20 08:57:33.230026 2020] [wsgi:error] [pid 29122:tid 1963328560] [remote 192.168.86.1:36470]   File "/var/www/main/venv/lib/python3.4/site-packages/flask/app.py", line 1949, in full_dispatch_request
+[Mon Jan 20 08:57:33.230045 2020] [wsgi:error] [pid 29122:tid 1963328560] [remote 192.168.86.1:36470]     rv = self.dispatch_request()
+[Mon Jan 20 08:57:33.230063 2020] [wsgi:error] [pid 29122:tid 1963328560] [remote 192.168.86.1:36470]   File "/var/www/main/venv/lib/python3.4/site-packages/flask/app.py", line 1935, in dispatch_request
+[Mon Jan 20 08:57:33.230083 2020] [wsgi:error] [pid 29122:tid 1963328560] [remote 192.168.86.1:36470]     return self.view_functions[rule.endpoint](**req.view_args)
+[Mon Jan 20 08:57:33.230103 2020] [wsgi:error] [pid 29122:tid 1963328560] [remote 192.168.86.1:36470]   File "/var/www/main/thermostat/server.py", line 80, in get_therm_api
+[Mon Jan 20 08:57:33.230121 2020] [wsgi:error] [pid 29122:tid 1963328560] [remote 192.168.86.1:36470]     "temp": str(temp_util.ctof(temp_util.get_current(mysql))),
+[Mon Jan 20 08:57:33.230171 2020] [wsgi:error] [pid 29122:tid 1963328560] [remote 192.168.86.1:36470]   File "/var/www/main/thermostat/temp_util.py", line 14, in get_current
+[Mon Jan 20 08:57:33.230190 2020] [wsgi:error] [pid 29122:tid 1963328560] [remote 192.168.86.1:36470]     temp = dbutils.read_current_temp(cnx)
+[Mon Jan 20 08:57:33.230206 2020] [wsgi:error] [pid 29122:tid 1963328560] [remote 192.168.86.1:36470]   File "/var/www/main/thermostat/dbutils.py", line 37, in read_current_temp
+[Mon Jan 20 08:57:33.230223 2020] [wsgi:error] [pid 29122:tid 1963328560] [remote 192.168.86.1:36470]     return cursor.fetchone()[0]
+[Mon Jan 20 08:57:33.230247 2020] [wsgi:error] [pid 29122:tid 1963328560] [remote 192.168.86.1:36470] TypeError: 'NoneType' object is not subscriptable
+[Mon Jan 20 08:57:33.230409 2020] [wsgi:error] [pid 29122:tid 1963328560] [remote 192.168.86.1:36470] 
+[Mon Jan 20 08:57:33.251569 2020] [wsgi:error] [pid 29122:tid 1929774128] [remote 192.168.86.1:38006] [2020-01-20 08:57:33,249] ERROR in app: Exception on /_/therm [GET]
+[Mon Jan 20 08:57:33.251667 2020] [wsgi:error] [pid 29122:tid 1929774128] [remote 192.168.86.1:38006] Traceback (most recent call last):
+[Mon Jan 20 08:57:33.251686 2020] [wsgi:error] [pid 29122:tid 1929774128] [remote 192.168.86.1:38006]   File "/var/www/main/venv/lib/python3.4/site-packages/flask/app.py", line 2446, in wsgi_app
+[Mon Jan 20 08:57:33.251705 2020] [wsgi:error] [pid 29122:tid 1929774128] [remote 192.168.86.1:38006]     response = self.full_dispatch_request()
+[Mon Jan 20 08:57:33.251722 2020] [wsgi:error] [pid 29122:tid 1929774128] [remote 192.168.86.1:38006]   File "/var/www/main/venv/lib/python3.4/site-packages/flask/app.py", line 1951, in full_dispatch_request
+[Mon Jan 20 08:57:33.251740 2020] [wsgi:error] [pid 29122:tid 1929774128] [remote 192.168.86.1:38006]     rv = self.handle_user_exception(e)
+[Mon Jan 20 08:57:33.251757 2020] [wsgi:error] [pid 29122:tid 1929774128] [remote 192.168.86.1:38006]   File "/var/www/main/venv/lib/python3.4/site-packages/flask/app.py", line 1820, in handle_user_exception
+[Mon Jan 20 08:57:33.251776 2020] [wsgi:error] [pid 29122:tid 1929774128] [remote 192.168.86.1:38006]     reraise(exc_type, exc_value, tb)
+[Mon Jan 20 08:57:33.251793 2020] [wsgi:error] [pid 29122:tid 1929774128] [remote 192.168.86.1:38006]   File "/var/www/main/venv/lib/python3.4/site-packages/flask/_compat.py", line 39, in reraise
+[Mon Jan 20 08:57:33.251811 2020] [wsgi:error] [pid 29122:tid 1929774128] [remote 192.168.86.1:38006]     raise value
+[Mon Jan 20 08:57:33.251828 2020] [wsgi:error] [pid 29122:tid 1929774128] [remote 192.168.86.1:38006]   File "/var/www/main/venv/lib/python3.4/site-packages/flask/app.py", line 1949, in full_dispatch_request
+[Mon Jan 20 08:57:33.251846 2020] [wsgi:error] [pid 29122:tid 1929774128] [remote 192.168.86.1:38006]     rv = self.dispatch_request()
+[Mon Jan 20 08:57:33.251863 2020] [wsgi:error] [pid 29122:tid 1929774128] [remote 192.168.86.1:38006]   File "/var/www/main/venv/lib/python3.4/site-packages/flask/app.py", line 1935, in dispatch_request
+[Mon Jan 20 08:57:33.251881 2020] [wsgi:error] [pid 29122:tid 1929774128] [remote 192.168.86.1:38006]     return self.view_functions[rule.endpoint](**req.view_args)
+[Mon Jan 20 08:57:33.251898 2020] [wsgi:error] [pid 29122:tid 1929774128] [remote 192.168.86.1:38006]   File "/var/www/main/thermostat/server.py", line 80, in get_therm_api
+[Mon Jan 20 08:57:33.251915 2020] [wsgi:error] [pid 29122:tid 1929774128] [remote 192.168.86.1:38006]     "temp": str(temp_util.ctof(temp_util.get_current(mysql))),
+[Mon Jan 20 08:57:33.251933 2020] [wsgi:error] [pid 29122:tid 1929774128] [remote 192.168.86.1:38006]   File "/var/www/main/thermostat/temp_util.py", line 14, in get_current
+[Mon Jan 20 08:57:33.251950 2020] [wsgi:error] [pid 29122:tid 1929774128] [remote 192.168.86.1:38006]     temp = dbutils.read_current_temp(cnx)
+[Mon Jan 20 08:57:33.251967 2020] [wsgi:error] [pid 29122:tid 1929774128] [remote 192.168.86.1:38006]   File "/var/www/main/thermostat/dbutils.py", line 37, in read_current_temp
+[Mon Jan 20 08:57:33.252015 2020] [wsgi:error] [pid 29122:tid 1929774128] [remote 192.168.86.1:38006]     return cursor.fetchone()[0]
+[Mon Jan 20 08:57:33.252039 2020] [wsgi:error] [pid 29122:tid 1929774128] [remote 192.168.86.1:38006] TypeError: 'NoneType' object is not subscriptable
+[Mon Jan 20 08:57:33.252177 2020] [wsgi:error] [pid 29122:tid 1929774128] [remote 192.168.86.1:38006] 
+[Mon Jan 20 08:57:38.015309 2020] [wsgi:error] [pid 29122:tid 1938162736] [remote 192.168.86.1:20854] [2020-01-20 08:57:38,013] ERROR in app: Exception on /therm [GET]
+[Mon Jan 20 08:57:38.015435 2020] [wsgi:error] [pid 29122:tid 1938162736] [remote 192.168.86.1:20854] Traceback (most recent call last):
+[Mon Jan 20 08:57:38.015456 2020] [wsgi:error] [pid 29122:tid 1938162736] [remote 192.168.86.1:20854]   File "/var/www/main/venv/lib/python3.4/site-packages/flask/app.py", line 2446, in wsgi_app
+[Mon Jan 20 08:57:38.015476 2020] [wsgi:error] [pid 29122:tid 1938162736] [remote 192.168.86.1:20854]     response = self.full_dispatch_request()
+[Mon Jan 20 08:57:38.015494 2020] [wsgi:error] [pid 29122:tid 1938162736] [remote 192.168.86.1:20854]   File "/var/www/main/venv/lib/python3.4/site-packages/flask/app.py", line 1951, in full_dispatch_request
+[Mon Jan 20 08:57:38.015512 2020] [wsgi:error] [pid 29122:tid 1938162736] [remote 192.168.86.1:20854]     rv = self.handle_user_exception(e)
+[Mon Jan 20 08:57:38.015529 2020] [wsgi:error] [pid 29122:tid 1938162736] [remote 192.168.86.1:20854]   File "/var/www/main/venv/lib/python3.4/site-packages/flask/app.py", line 1820, in handle_user_exception
+[Mon Jan 20 08:57:38.015547 2020] [wsgi:error] [pid 29122:tid 1938162736] [remote 192.168.86.1:20854]     reraise(exc_type, exc_value, tb)
+[Mon Jan 20 08:57:38.015564 2020] [wsgi:error] [pid 29122:tid 1938162736] [remote 192.168.86.1:20854]   File "/var/www/main/venv/lib/python3.4/site-packages/flask/_compat.py", line 39, in reraise
+[Mon Jan 20 08:57:38.015582 2020] [wsgi:error] [pid 29122:tid 1938162736] [remote 192.168.86.1:20854]     raise value
+[Mon Jan 20 08:57:38.015600 2020] [wsgi:error] [pid 29122:tid 1938162736] [remote 192.168.86.1:20854]   File "/var/www/main/venv/lib/python3.4/site-packages/flask/app.py", line 1949, in full_dispatch_request
+[Mon Jan 20 08:57:38.015715 2020] [wsgi:error] [pid 29122:tid 1938162736] [remote 192.168.86.1:20854]     rv = self.dispatch_request()
+[Mon Jan 20 08:57:38.015735 2020] [wsgi:error] [pid 29122:tid 1938162736] [remote 192.168.86.1:20854]   File "/var/www/main/venv/lib/python3.4/site-packages/flask/app.py", line 1935, in dispatch_request
+[Mon Jan 20 08:57:38.015753 2020] [wsgi:error] [pid 29122:tid 1938162736] [remote 192.168.86.1:20854]     return self.view_functions[rule.endpoint](**req.view_args)
+[Mon Jan 20 08:57:38.015771 2020] [wsgi:error] [pid 29122:tid 1938162736] [remote 192.168.86.1:20854]   File "/var/www/main/thermostat/server.py", line 70, in therm_
+[Mon Jan 20 08:57:38.015788 2020] [wsgi:error] [pid 29122:tid 1938162736] [remote 192.168.86.1:20854]     temp = temp_util.get_current(mysql)
+[Mon Jan 20 08:57:38.015805 2020] [wsgi:error] [pid 29122:tid 1938162736] [remote 192.168.86.1:20854]   File "/var/www/main/thermostat/temp_util.py", line 14, in get_current
+[Mon Jan 20 08:57:38.015822 2020] [wsgi:error] [pid 29122:tid 1938162736] [remote 192.168.86.1:20854]     temp = dbutils.read_current_temp(cnx)
+[Mon Jan 20 08:57:38.015839 2020] [wsgi:error] [pid 29122:tid 1938162736] [remote 192.168.86.1:20854]   File "/var/www/main/thermostat/dbutils.py", line 37, in read_current_temp
+[Mon Jan 20 08:57:38.015856 2020] [wsgi:error] [pid 29122:tid 1938162736] [remote 192.168.86.1:20854]     return cursor.fetchone()[0]
+[Mon Jan 20 08:57:38.015881 2020] [wsgi:error] [pid 29122:tid 1938162736] [remote 192.168.86.1:20854] TypeError: 'NoneType' object is not subscriptable
+[Mon Jan 20 08:57:38.016032 2020] [wsgi:error] [pid 29122:tid 1938162736] [remote 192.168.86.1:20854] 
+[Mon Jan 20 16:59:09.627897 2020] [mpm_event:notice] [pid 824:tid 1995517952] AH00491: caught SIGTERM, shutting down
+[Mon Jan 20 08:59:17.639444 2020] [wsgi:warn] [pid 837:tid 1996353536] mod_wsgi: Compiled for Python/3.4.2rc1+.
+[Mon Jan 20 08:59:17.641100 2020] [wsgi:warn] [pid 837:tid 1996353536] mod_wsgi: Runtime using Python/3.4.2.
+[Mon Jan 20 08:59:17.645142 2020] [mpm_event:notice] [pid 837:tid 1996353536] AH00489: Apache/2.4.10 (Raspbian) mod_wsgi/4.3.0 Python/3.4.2 configured -- resuming normal operations
+[Mon Jan 20 08:59:17.645264 2020] [core:notice] [pid 837:tid 1996353536] AH00094: Command line: '/usr/sbin/apache2'
+[Mon Jan 20 09:07:53.922480 2020] [wsgi:error] [pid 867:tid 1930609712] 2020-01-19 09:07:53.724079
+[Mon Jan 20 17:01:56.500481 2020] [wsgi:error] [pid 867:tid 1930609712] 2020-01-19 17:01:56.303527
+[Mon Jan 20 17:49:40.517434 2020] [wsgi:error] [pid 867:tid 1938998320] 2020-01-19 17:49:40.299504
+[Tue Jan 21 06:25:06.698956 2020] [mpm_event:notice] [pid 837:tid 1996353536] AH00493: SIGUSR1 received.  Doing graceful restart
+AH00558: apache2: Could not reliably determine the server's fully qualified domain name, using 127.0.1.1. Set the 'ServerName' directive globally to suppress this message

@@ -6,7 +6,7 @@ THERMOSTAT_PID=""
 start() {
   if [ -z "$THERMOSTAT_PID" ]
   then
-    /var/www/main/venv/bin/python3 /var/www/main/thermostat/record.py > /var/log/thermostat/log.txt &
+    /var/www/main/venv/bin/python3 /var/www/main/thermostat/record.py &> /var/log/thermostat/log.txt &
     THERMOSTAT_PID=$!
   fi
 }
